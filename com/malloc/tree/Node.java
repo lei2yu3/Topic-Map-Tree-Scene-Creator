@@ -59,17 +59,20 @@ public class Node {
             throws IOException {
 
         // TODO жизі
-        // read topic map from xtm
-        TopicMapStoreIF nStore = new InMemoryTopicMapStore();
-        TopicMapIF nTopicmap = nStore.getTopicMap();
-
-        TopicMapImporterIF nReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        nReader.importInto(nTopicmap);
-
+        XTMTopicMapReader nReader = new XTMTopicMapReader(new File("TREE.xtm"));
+        TopicMapIF nTopicmap = nReader.read();
         TopicMapBuilderIF nBuilder = nTopicmap.getBuilder();
-        // System.out.println("nnnn " + nTopicmap.getTopics().size() +
-        // " TOPICS");
+        System.out.println("node1 " + nTopicmap.getTopics().size() + " TOPICS");
+        /*
+                // read topic map from xtm
+                TopicMapStoreIF nStore = new InMemoryTopicMapStore();
+                TopicMapIF nTopicmap = nStore.getTopicMap();
 
+                TopicMapImporterIF nReader = new XTMTopicMapReader(new File("TREE.xtm"));
+                nReader.importInto(nTopicmap);
+
+                TopicMapBuilderIF nBuilder = nTopicmap.getBuilder();
+        */
         //
         this.index = i;
         this.name = s;
@@ -84,6 +87,7 @@ public class Node {
         // write topic map to xtm
         new XTMTopicMapWriter("TREE.xtm").write(nTopicmap);
 
+        System.out.println("node2 " + nTopicmap.getTopics().size() + " TOPICS");
         // System.out.println(this.index);
         // System.out.println(this.name);
         // System.out.println(this.nodetype);
@@ -92,8 +96,8 @@ public class Node {
         // System.out.println(this.topic.getItemIdentifiers());
         // System.out.println("=================");
 
-        nStore.commit();
-        nStore.close();
+        // nStore.commit();
+        // nStore.close();
     }
 
     public int getIndex() {
@@ -143,11 +147,11 @@ public class Node {
                     System.out.println("=================");
                 }
         */
-        NodeTree xx = new NodeTree();
+//        NodeTree xx = new NodeTree();
         // xx.fun(123, "asd");
         // xx.fun(332, "ggd");
 
-        System.out.println("\nDONE!!");
+        System.out.println("\nNode DONE!!");
     }
 
 }

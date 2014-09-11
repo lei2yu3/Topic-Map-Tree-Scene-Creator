@@ -54,15 +54,20 @@ public class NodeTree {
     NodeTree() throws IOException {
 
         // TODO 重做
-        // read topic map from xtm
-        TopicMapStoreIF tStore = new InMemoryTopicMapStore();
-        TopicMapIF tTopicmap = tStore.getTopicMap();
-
-        TopicMapImporterIF tReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        tReader.importInto(tTopicmap);
-
+        XTMTopicMapReader tReader = new XTMTopicMapReader(new File("TREE.xtm"));
+        TopicMapIF tTopicmap = tReader.read();
         TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
 
+        /*        
+                // read topic map from xtm
+                TopicMapStoreIF tStore = new InMemoryTopicMapStore();
+                TopicMapIF tTopicmap = tStore.getTopicMap();
+
+                TopicMapImporterIF tReader = new XTMTopicMapReader(new File("TREE.xtm"));
+                tReader.importInto(tTopicmap);
+
+                TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
+        */
         /*
         // node role type
         topicRoot = tBuilder.makeTopic();
@@ -101,17 +106,18 @@ public class NodeTree {
         // System.out.println(getSize());
 
         // TODO bug 无法写入TREE.xtm
+        System.out.println("NT1" + tTopicmap.getTopics().size() + " TOPICS");
+        Node kamiNode = new Node(-1, "KAMI", NodeType.Other, null, null);
         sizeIncrease();
         // System.out.println(getSize());
 
         // write topic map to xtm
         new XTMTopicMapWriter("TREE.xtm").write(tTopicmap);
 
-        System.out.println("TREE.xtm have a topic map with "
-                + tTopicmap.getTopics().size() + " TOPICS");
+        System.out.println("NT2" + tTopicmap.getTopics().size() + " TOPICS");
 
-        tStore.commit();
-        tStore.close();
+        // tStore.commit();
+        // tStore.close();
     }
 
     // 参数 当前节点（即父节点），待加入的节点的参数(index;name;topic;nodetype;)
@@ -228,6 +234,11 @@ public class NodeTree {
     // for test
     public static void main(String[] args) throws IOException {
 
+        // TODO 重做
+        XTMTopicMapReader mReader = new XTMTopicMapReader(new File("TREE.xtm"));
+        TopicMapIF mTopicmap = mReader.read();
+        TopicMapBuilderIF mBuilder = mTopicmap.getBuilder();
+        /*
         TopicMapStoreIF mStore = new InMemoryTopicMapStore();
         TopicMapIF mTopicmap = mStore.getTopicMap();
 
@@ -236,6 +247,7 @@ public class NodeTree {
 
         TopicMapBuilderIF mBuilder = mTopicmap.getBuilder();
         System.out.println("mmmmm " + mTopicmap.getTopics().size() + " TOPICS");
+        */
         /*
                 // TODO 读取已存在的XTM文件，在此XTM中进行添加删除
                 TopicMapStoreIF store = new InMemoryTopicMapStore();
@@ -256,20 +268,23 @@ public class NodeTree {
             System.out.println("=================");
         */
 
+        System.out.println("main1 " + mTopicmap.getTopics().size() + " TOPICS");
         NodeTree tree = new NodeTree();
-        Node kamiNode = new Node(-1, "Kami", NodeType.Other, null, null);
-        mStore.commit();
-        mStore.close();
+        System.out.println("main2 " + mTopicmap.getTopics().size() + " TOPICS");
+        // Node kamiNode = new Node(-1, "Kami", NodeType.Other, null, null);
+        // mStore.commit();
+        // mStore.close();
         // fun(222,"hoooo");
         // fun(33,"Boocoo");
         // fun(123,"kaaaami");
 
         // Node kamiNode = new Node(-1, "Kami", NodeType.Other, null, null);
         // Node hh = new Node(11, "haha", NodeType.Data, null, null);
-        // System.out.println(tree.getSize());
+        System.out.println(tree.getSize());
 
-        System.out.println("mmmmm " + mTopicmap.getTopics().size() + " TOPICS");
+        // System.out.println("mmmmm " + mTopicmap.getTopics().size() +
+        // " TOPICS");
 
-        System.out.println("DONE");
+        System.out.println("\n nodetree DONE");
     }
 }
