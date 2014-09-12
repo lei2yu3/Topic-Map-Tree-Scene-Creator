@@ -15,27 +15,20 @@ import net.ontopia.topicmaps.xml.XTMTopicMapReader;
 import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
 
 public class Node {
+
+    // node type
     public enum NodeType {
-        // Scene(1, "scene"), Data(2, "data"), Value(3, "value");
         Scene("scene"), Data("data"), Value("value"), Other("other");
 
-        // private int id;
         private String type;
 
         private NodeType() {
-            // this(0, null);
             this(null);
         }
 
-        // private NodeType(int i, String s) {
         private NodeType(String s) {
-            // this.id = i;
             this.type = s;
         }
-
-        // public int getIndex() {
-        // return this.id;
-        // }
 
         public String getString() {
             return this.type;
@@ -58,21 +51,30 @@ public class Node {
     public Node(int i, String s, NodeType n, Node pn, ArrayList<Node> ll)
             throws IOException {
 
-        // TODO 重做
+        // TODO 读取xtm重做
+        /*
+        // 原始版本
+        TopicMapStoreIF nStore = new InMemoryTopicMapStore();
+        TopicMapIF nTopicmap = nStore.getTopicMap();
+
+        TopicMapImporterIF nReader = new XTMTopicMapReader(new File("TREE.xtm"));
+        nReader.importInto(nTopicmap);
+
+        TopicMapBuilderIF nBuilder = nTopicmap.getBuilder();
+        */
+        // 重做1
+        /*
         XTMTopicMapReader nReader = new XTMTopicMapReader(new File("TREE.xtm"));
         TopicMapIF nTopicmap = nReader.read();
         TopicMapBuilderIF nBuilder = nTopicmap.getBuilder();
         System.out.println("node1 " + nTopicmap.getTopics().size() + " TOPICS");
-        /*
-                // read topic map from xtm
-                TopicMapStoreIF nStore = new InMemoryTopicMapStore();
-                TopicMapIF nTopicmap = nStore.getTopicMap();
-
-                TopicMapImporterIF nReader = new XTMTopicMapReader(new File("TREE.xtm"));
-                nReader.importInto(nTopicmap);
-
-                TopicMapBuilderIF nBuilder = nTopicmap.getBuilder();
         */
+
+        // 重做2
+
+        XtmCreator nCreator = new XtmCreator();
+        TopicMapBuilderIF nBuilder = nCreator.cTopicmap.getBuilder();
+
         //
         this.index = i;
         this.name = s;
@@ -85,9 +87,9 @@ public class Node {
         this.leafList = ll;
 
         // write topic map to xtm
-        new XTMTopicMapWriter("TREE.xtm").write(nTopicmap);
+        new XTMTopicMapWriter(nCreator.getXTM()).write(nCreator.cTopicmap);
 
-        System.out.println("node2 " + nTopicmap.getTopics().size() + " TOPICS");
+        System.out.println("node2 " + nCreator.cTopicmap.getTopics().size() + " TOPICS");
         // System.out.println(this.index);
         // System.out.println(this.name);
         // System.out.println(this.nodetype);
@@ -147,7 +149,7 @@ public class Node {
                     System.out.println("=================");
                 }
         */
-//        NodeTree xx = new NodeTree();
+        // NodeTree xx = new NodeTree();
         // xx.fun(123, "asd");
         // xx.fun(332, "ggd");
 

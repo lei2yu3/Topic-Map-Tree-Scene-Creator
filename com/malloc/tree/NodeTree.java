@@ -38,89 +38,49 @@ public class NodeTree {
 
     // private static Node kamiNode = null;
 
-    // topic
-    private static TopicIF topicRoot = null;
-    private static TopicIF topicParentScene = null;
-    private static TopicIF topicLeafScene = null;
-    private static TopicIF topicScene = null;
-    private static TopicIF topicData = null;
-    private static TopicIF topicValue = null;
-    private static TopicIF topicSD = null;
-    private static TopicIF topicSS = null;
-    private static TopicIF topicDV = null;
-    private static TopicIF topicRS = null;
-
     // 初始化，根节点，xtm
     NodeTree() throws IOException {
 
-        // TODO 重做
+        // TODO 读取xtm中的tm 重做
+        /*        
+        // 原始版本
+        TopicMapStoreIF tStore = new InMemoryTopicMapStore();
+        TopicMapIF tTopicmap = tStore.getTopicMap();
+
+        TopicMapImporterIF tReader = new XTMTopicMapReader(new File("TREE.xtm"));
+        tReader.importInto(tTopicmap);
+
+        TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
+        */
+        // 重做1
+        /*        
         XTMTopicMapReader tReader = new XTMTopicMapReader(new File("TREE.xtm"));
         TopicMapIF tTopicmap = tReader.read();
         TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
-
-        /*        
-                // read topic map from xtm
-                TopicMapStoreIF tStore = new InMemoryTopicMapStore();
-                TopicMapIF tTopicmap = tStore.getTopicMap();
-
-                TopicMapImporterIF tReader = new XTMTopicMapReader(new File("TREE.xtm"));
-                tReader.importInto(tTopicmap);
-
-                TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
         */
-        /*
-        // node role type
-        topicRoot = tBuilder.makeTopic();
-        TopicNameIF tnRoot = tBuilder.makeTopicName(topicRoot, "Root");
-                
-        topicParentScene = tBuilder.makeTopic();
-        TopicNameIF tnParentScene = tBuilder.makeTopicName(topicParentScene,
-                "ParentScene");
 
-        topicLeafScene = tBuilder.makeTopic();
-        TopicNameIF tnLeafScene = tBuilder.makeTopicName(topicLeafScene,
-                "LeafScene");
-
-        topicScene = tBuilder.makeTopic();
-        TopicNameIF tnScene = tBuilder.makeTopicName(topicScene, "Scene");
-
-        topicData = tBuilder.makeTopic();
-        TopicNameIF tnData = tBuilder.makeTopicName(topicData, "Data");
-
-        topicValue = tBuilder.makeTopic();
-        TopicNameIF tnValue = tBuilder.makeTopicName(topicValue, "Value");
-
-        // node association type
-        topicRS = tBuilder.makeTopic();
-        TopicNameIF tnRS = tBuilder.makeTopicName(topicRS, "Root-Scene");
-
-        topicSD = tBuilder.makeTopic();
-        TopicNameIF tnSD = tBuilder.makeTopicName(topicSD, "Scene-Data");
-
-        topicSS = tBuilder.makeTopic();
-        TopicNameIF tnSS = tBuilder.makeTopicName(topicSS, "Scene-Scene");
-
-        topicDV = tBuilder.makeTopic();
-        TopicNameIF tnDV = tBuilder.makeTopicName(topicDV, "Data-Value");
-                */
-        // System.out.println(getSize());
+        // 重做2
+        XtmCreator xCreator = new XtmCreator();
+//        TopicMapBuilderIF xBuilder = nCreator.cTopicmap.getBuilder();
+        System.out.println("nodetree1 " + xCreator.cTopicmap.getTopics().size()
+                + " TOPICS");
 
         // TODO bug 无法写入TREE.xtm
-        System.out.println("NT1" + tTopicmap.getTopics().size() + " TOPICS");
         Node kamiNode = new Node(-1, "KAMI", NodeType.Other, null, null);
         sizeIncrease();
-        // System.out.println(getSize());
 
         // write topic map to xtm
-        new XTMTopicMapWriter("TREE.xtm").write(tTopicmap);
+        new XTMTopicMapWriter(xCreator.getXTM()).write(xCreator.cTopicmap);
 
-        System.out.println("NT2" + tTopicmap.getTopics().size() + " TOPICS");
+        // System.out.println(getSize());
+        System.out.println("nodetree2" + xCreator.cTopicmap.getTopics().size()
+                + " TOPICS");
 
         // tStore.commit();
         // tStore.close();
     }
 
-    // 参数 当前节点（即父节点），待加入的节点的参数(index;name;topic;nodetype;)
+    // 参数 当前节点（即父节点）(index, nName)，待加入的节点的参数(index, name, nodetype)
     // 返回 是否添加成功，父节点的getLeafList长度是否加一
     // 流程 根据pNode.getIndex()找到父节点，添加pNode.getLeafList().add(addNode);
     // 添加到树，然后根据pNode与addNode修改TM
