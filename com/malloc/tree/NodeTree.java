@@ -21,261 +21,228 @@ import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
 
 public class NodeTree {
 
-    // tree size
-    private int size = 0;
+	// xtm file
+	private static final String XTM = "SceneCreatorSystem.xtm";
 
-    public int getSize() {
-        return this.size;
-    }
+	// public String getXTM(){
+	// return XTM;
+	// }
 
-    public int sizeIncrease() {
-        return ++size;
-    }
+	// tree size
+	private int size = 0;
 
-    public int sizeDecrease() {
-        return --size;
-    }
+	public int getSize() {
+		return this.size;
+	}
 
-    // private static Node kamiNode = null;
+	public int sizeIncrease() {
+		return ++size;
+	}
 
-    static TopicMapIF aTopicmap = null;
-    static XTMTopicMapReader aReader = null;
-    static TopicMapBuilderIF aBuilder = null;
+	public int sizeDecrease() {
+		return --size;
+	}
 
-    // 初始化，根节点，xtm
-    public NodeTree() throws IOException {
+	// topic map
+	TopicMapIF aTopicmap = null;
+	XTMTopicMapReader aReader = null;
+	TopicMapBuilderIF aBuilder = null;
 
-        // TODO 读取xtm中的tm 重做
-        /*        
-        // 原始版本
-        TopicMapStoreIF tStore = new InMemoryTopicMapStore();
-        TopicMapIF tTopicmap = tStore.getTopicMap();
+	// basic topic
+	TopicIF topicRoot = null;
+	TopicIF topicParentScene = null;
+	TopicIF topicLeafScene = null;
+	TopicIF topicScene = null;
+	TopicIF topicData = null;
+	TopicIF topicValue = null;
+	TopicIF topicRS = null;
+	TopicIF topicSS = null;
+	TopicIF topicSD = null;
+	TopicIF topicDV = null;
 
-        TopicMapImporterIF tReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        tReader.importInto(tTopicmap);
+	// root node
+	Node nodeKami = null;
+	TopicIF topicKami = null;
 
-        TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
-        */
-        // 重做1
-        /*        
-        XTMTopicMapReader tReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        TopicMapIF tTopicmap = tReader.read();
-        TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
-        */
+	// initialize root node and xtm file
+	public NodeTree() throws IOException {
 
-        // 重做2
-//        XtmCreator xCreator = new XtmCreator();
-        // TopicMapBuilderIF xBuilder = nCreator.cTopicmap.getBuilder();
-//        System.out.println("nodetree1 " + xCreator.cTopicmap.getTopics().size()
-//                + " TOPICS");
+		// TODO 读取xtm中的tm 重做
+		/*
+		 * // 原始版本 TopicMapStoreIF tStore = new InMemoryTopicMapStore();
+		 * TopicMapIF tTopicmap = tStore.getTopicMap();
+		 * 
+		 * TopicMapImporterIF tReader = new XTMTopicMapReader(new
+		 * File("TREE.xtm")); tReader.importInto(tTopicmap);
+		 * 
+		 * TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
+		 */
+		// 重做1
+		/*
+		 * XTMTopicMapReader tReader = new XTMTopicMapReader(new
+		 * File("TREE.xtm")); TopicMapIF tTopicmap = tReader.read();
+		 * TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
+		 */
 
-        // TODO bug 无法写入TREE.xtm
-//        Node kamiNode = new Node(-1, "KAMI", NodeType.Other, null, null);
-        
+		// 重做2
+		// XtmCreator xCreator = new XtmCreator();
+		// TopicMapBuilderIF xBuilder = nCreator.cTopicmap.getBuilder();
+		// System.out.println("nodetree1 " +
+		// xCreator.cTopicmap.getTopics().size()
+		// + " TOPICS");
 
-        aReader = new XTMTopicMapReader(new File("hoho.xtm"));
-        aTopicmap = aReader.read();
-        aBuilder = aTopicmap.getBuilder();
-//        sizeIncrease();
+		// create a xtm with empty topic map
+		new XTMTopicMapWriter(XTM).write(new InMemoryTopicMapStore()
+				.getTopicMap());
 
-        // write topic map to xtm
-        new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
+		// read topic map from xtm
+		aReader = new XTMTopicMapReader(new File(XTM));
+		aTopicmap = aReader.read();
+		aBuilder = aTopicmap.getBuilder();
 
-        // System.out.println(getSize());
-        System.out.println("nodetree2" + aTopicmap.getTopics().size()
-                + " TOPICS");
+		// root node
+		topicKami = aBuilder.makeTopic();
+		aBuilder.makeTopicName(topicKami, "KamiNode");
+		nodeKami = new Node(-1, "Kami", topicKami, NodeType.Other, null, null);
 
-        // tStore.commit();
-        // tStore.close();
-    }
+		// write topic map to xtm
+		new XTMTopicMapWriter(XTM).write(aTopicmap);
 
-    // 参数 当前节点（即父节点）(index, nName)，待加入的节点的参数(index, name, nodetype)
-    // 返回 是否添加成功，父节点的getLeafList长度是否加一
-    // 流程 根据pNode.getIndex()找到父节点，添加pNode.getLeafList().add(addNode);
-    // 添加到树，然后根据pNode与addNode修改TM
-    // add
-    // public void AddNode(Node pNode, Node addNode) {
-    public boolean AddNode(int pIndex, String pName, int addIndex,
-            String addName, NodeType nt) throws IOException {
-        int treeSize = getSize();
-        int newTreeSize = 0;
+		System.out.println("nodetree2" + aTopicmap.getTopics().size()
+				+ " TOPICS");
 
-        Node pNode = FindNode(pIndex);
+	}
 
-        // TODO 在树的根节点添加节点，将父节点设置为kamiNode
-        if (pIndex == -1) {
-            // pNode = kamiNode;
-        }
+	// 参数 当前节点（即父节点）(index, nName)，待加入的节点的参数(index, name, nodetype)
+	// 返回 是否添加成功，父节点的getLeafList长度是否加一
+	// 流程 根据pNode.getIndex()找到父节点，添加pNode.getLeafList().add(addNode);
+	// 添加到树，然后根据pNode与addNode修改TM
+	// add
+	public boolean AddNode(int pIndex, String pName, int addIndex,
+			String addName, NodeType nt) throws IOException {
+		int treeSize = getSize();
+		int newTreeSize = 0;
 
-        if (pNode.getLeafList() == null) {
-            // pNode.getLeafList() = new ArrayList<Node>();
-        }
+		Node pNode = FindNode(pIndex);
 
-        // TODO new topic addTopic
-//        Node addNode = new Node(addIndex, addName, nt, pNode, null);
+		// TODO 在树的根节点添加节点，将父节点设置为kamiNode
+		if (pIndex == -1) {
+			// pNode = kamiNode;
+		}
 
-//        pNode.getLeafList().add(addNode);
-        sizeIncrease();
+		if (pNode.getLeafList() == null) {
+			// pNode.getLeafList() = new ArrayList<Node>();
+		}
 
-        if (nt == NodeType.Scene) {
-            // TODO meke association ss
-        } else if (nt == NodeType.Data) {
-            // TODO meke association sd
+		// TODO new topic addTopic
+		// Node addNode = new Node(addIndex, addName, nt, pNode, null);
 
-        } else if (nt == NodeType.Value) {
-            // TODO meke association dv
+		// pNode.getLeafList().add(addNode);
+		sizeIncrease();
 
-        }
-        // TODO modify tm, save to xtm
+		if (nt == NodeType.Scene) {
+			// TODO meke association ss
+		} else if (nt == NodeType.Data) {
+			// TODO meke association sd
 
-        return newTreeSize == treeSize + 1 ? true : false;
-    }
+		} else if (nt == NodeType.Value) {
+			// TODO meke association dv
 
-    // 参数 当前节点（即子节点）
-    // 返回 是否删除成功，父节点的getLeafList是否为空
-    // 流程 遍历以delNode为根的子树，依次删除
-    // delete
-    public boolean DeleteNode(int delIndex, String delName) throws IOException {
-        int treeSize = 0;
-        int newTreeSize = 0;
+		}
 
-        Node delNode = FindNode(delIndex);
+		// TODO modify tm, save to xtm
+		new XTMTopicMapWriter(XTM).write(aTopicmap);
 
-        // TODO 深度优先遍历以delNode为根的子树
-        // sizeDecrease();
+		return newTreeSize == treeSize + 1 ? true : false;
+	}
 
-        // TODO modify tm, save to xtm
+	// 参数 当前节点（即子节点）
+	// 返回 是否删除成功，父节点的getLeafList是否为空
+	// 流程 遍历以delNode为根的子树，依次删除
+	// delete
+	public boolean DeleteNode(int delIndex, String delName) throws IOException {
+		int treeSize = 0;
+		int newTreeSize = 0;
 
-        return newTreeSize == treeSize - 1 ? true : false;
-    }
+		Node delNode = FindNode(delIndex);
 
-    // 深度遍历查找指定index的Node，返回该节点
-    // find
-    public Node FindNode(int fIndex) throws IOException {
+		// TODO 深度优先遍历以delNode为根的子树，（保存为ArrayList）依次删除
+		// sizeDecrease();
 
-        Node goalNode = null;
+		// TODO modify tm, save to xtm
+		new XTMTopicMapWriter(XTM).write(aTopicmap);
 
-        // TODO 深度优先遍历树
+		return newTreeSize == treeSize - 1 ? true : false;
+	}
 
-        return goalNode;// TODO 返回查找到的节点
-    }
+	// 深度遍历查找指定index的Node，返回该节点
+	// find
+	public Node FindNode(int targetNodeIndex) throws IOException {
 
-    // public boolean isLeaf() {
-    // if (childList == null) {
-    // return true;
-    // } else {
-    // if (childList.isEmpty()) {
-    // return true;
-    // } else {
-    // return false;
-    // }
-    // }
-    // }
+		Node targetNode = null;
 
-    // for test
-    public static void fun(int iii, String sss) throws IOException {
+		// TODO 深度优先遍历树，查找指定index的节点
 
-//        XtmCreator nCreator = new XtmCreator();
-//        new XTMTopicMapWriter(nCreator.getXTM()).write(nCreator.cTopicmap);
+		return targetNode;// TODO 返回查找到的节点
+	}
 
-        // TopicMapStoreIF xStore = new InMemoryTopicMapStore();
-        // TopicMapIF xTopicmap = xStore.getTopicMap();
-        //
-        // TopicMapImporterIF xReader = new XTMTopicMapReader(new
-        // File("TREE.xtm"));
-        // xReader.importInto(xTopicmap);
-        //
-        // TopicMapBuilderIF xBuilder = xTopicmap.getBuilder();
+	// for test
+	public void init() throws IOException {
+		// ParentScene-LeafScene, Root-Scene, Scene-Data, Data-Value
 
-        // TopicIF hh = xBuilder.makeTopic();
-        // xBuilder.makeTopicName(hh, "hooooo");
-        // Node s = new Node(iii, sss, NodeType.Scene, null, null);
-        //
-        // System.out.println(s.getIndex());
-        // System.out.println(s.getName());
-        // System.out.println(s.getNodeType());
-        // System.out.println(s.getTopic().getTopicNames());
-        // System.out.println(s.getTopic().getObjectId());
-        // System.out.println(s.getTopic().getItemIdentifiers());
-        // System.out.println("=================");
+		// parent scene node in s-s
+		topicParentScene = aBuilder.makeTopic();
+		TopicNameIF tnParentScene = aBuilder.makeTopicName(topicParentScene,
+				"ParentScene");
 
-        // new XTMTopicMapWriter("TREE.xtm").write(xTopicmap);
+		// leaf scene node in s-s
+		topicLeafScene = aBuilder.makeTopic();
+		TopicNameIF tnLeafScene = aBuilder.makeTopicName(topicLeafScene,
+				"LeafScene");
 
-        // xStore.commit();
-        // xStore.close();
-        
-        
-    }
+		// scene node in s-d or r-s
+		topicScene = aBuilder.makeTopic();
+		TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
 
-    // for test
-    public static void main(String[] args) throws IOException {
-        // TODO 读取xtm中的tm 重做
-        /*        
-        // 原始版本
-        TopicMapStoreIF tStore = new InMemoryTopicMapStore();
-        TopicMapIF tTopicmap = tStore.getTopicMap();
+		// data node in s-d or d-v
+		topicData = aBuilder.makeTopic();
+		TopicNameIF tnData = aBuilder.makeTopicName(topicData, "Data");
 
-        TopicMapImporterIF tReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        tReader.importInto(tTopicmap);
+		// value node in d-v
+		topicValue = aBuilder.makeTopic();
+		TopicNameIF tnValue = aBuilder.makeTopicName(topicValue, "Value");
 
-        TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
-        */
-        // 重做1
-        /*        
-        XTMTopicMapReader tReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        TopicMapIF tTopicmap = tReader.read();
-        TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
-        */
+		// association type node r-s
+		topicRS = aBuilder.makeTopic();
+		TopicNameIF tnRS = aBuilder.makeTopicName(topicRS, "Root-Scene");
 
-        // 重做2
-//        XtmCreator nCreator = new XtmCreator();
-        // TopicMapBuilderIF xBuilder = nCreator.cTopicmap.getBuilder();
+		// association type node s-s
+		topicSS = aBuilder.makeTopic();
+		TopicNameIF tnSS = aBuilder.makeTopicName(topicSS, "Scene-Scene");
 
-        /*
-                // TODO 读取已存在的XTM文件，在此XTM中进行添加删除
-                TopicMapStoreIF store = new InMemoryTopicMapStore();
-                TopicMapIF topicmap = store.getTopicMap();
-                TopicMapBuilderIF builder = topicmap.getBuilder();
+		// association type node s-d
+		topicSD = aBuilder.makeTopic();
+		TopicNameIF tnSD = aBuilder.makeTopicName(topicSD, "Scene-Data");
 
-                String name = "qqq";
-                TopicIF t1 = builder.makeTopic();
-                builder.makeTopicName(t1, name);
+		// association type node d-v
+		topicDV = aBuilder.makeTopic();
+		TopicNameIF tnDV = aBuilder.makeTopicName(topicDV, "Data-Value");
 
-                Node s = new Scene(1, name, t1);
-                System.out.println(s.getIndex());
-                System.out.println(s.getName());
-                System.out.println(s.getNodeType());
-                System.out.println(s.getTopic().getTopicNames());
-                System.out.println(s.getTopic().getObjectId());
-                System.out.println(s.getTopic().getItemIdentifiers());
-            System.out.println("=================");
-        */
+		new XTMTopicMapWriter(XTM).write(aTopicmap);
+	}
 
-//        System.out.println("main1 " + nCreator.cTopicmap.getTopics().size()
-//                + " TOPICS");
-//        NodeTree tree = new NodeTree();
-//        System.out.println("main2 " + nCreator.cTopicmap.getTopics().size()
-//                + " TOPICS");
-        // Node kamiNode = new Node(-1, "Kami", NodeType.Other, null, null);
-        // mStore.commit();
-        // mStore.close();
-        // fun(222,"hoooo");
-        // fun(33,"Boocoo");
-        // fun(123,"kaaaami");
+	// for test
+	public static void main(String[] args) throws IOException {
 
-        // Node kamiNode = new Node(-1, "Kami", NodeType.Other, null, null);
-        // Node hh = new Node(11, "haha", NodeType.Data, null, null);
-//        System.out.println(tree.getSize());
+		NodeTree nt = new NodeTree();
 
-        // System.out.println("mmmmm " + mTopicmap.getTopics().size() +
-        // " TOPICS");
+		// initialize topic map with basic topics and associations
+		// nt.init();
 
+		// add and delete
+		// nt.AddNode(0, null, 0, null, NodeType.Scene);
+		// nt.DeleteNode(0, null);
 
-        NodeTree nt = new NodeTree();
-//        nt.AddNode(0, "", 1, "haha", NodeType.Other);
-//        nt.DeleteNode(1, "haha");
-//        
-        
-        System.out.println("\n nodetree DONE");
-    }
+		System.out.println("\n nodetree DONE");
+	}
 }
