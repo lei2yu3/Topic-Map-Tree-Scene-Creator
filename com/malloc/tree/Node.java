@@ -45,11 +45,11 @@ public class Node {
     private ArrayList<Node> leafList;
 
     public Node() throws IOException {
-        this(0, null, null, null, null);
+        this(0, null, null, null, null, null);
     }
 
-    public Node(int i, String s, NodeType n, Node pn, ArrayList<Node> ll)
-            throws IOException {
+    public Node(int i, String s, TopicIF t, NodeType n, Node pn,
+            ArrayList<Node> ll) throws IOException {
 
         // TODO 读取xtm重做
         /*
@@ -71,25 +71,27 @@ public class Node {
         */
 
         // 重做2
-
-        XtmCreator nCreator = new XtmCreator();
-        TopicMapBuilderIF nBuilder = nCreator.cTopicmap.getBuilder();
+        // XtmCreator nCreator = new XtmCreator();
+        // TopicMapBuilderIF nBuilder = nCreator.cTopicmap.getBuilder();
 
         //
         this.index = i;
         this.name = s;
 
-        this.topic = nBuilder.makeTopic();
-        nBuilder.makeTopicName(this.topic, s);
+        this.topic = t;
+
+        // this.topic = nBuilder.makeTopic();
+        // nBuilder.makeTopicName(this.topic, s);
 
         this.nodetype = n;
         this.parentNode = pn;
         this.leafList = ll;
 
         // write topic map to xtm
-        new XTMTopicMapWriter(nCreator.getXTM()).write(nCreator.cTopicmap);
+        // new XTMTopicMapWriter(nCreator.getXTM()).write(nCreator.cTopicmap);
 
-        System.out.println("node2 " + nCreator.cTopicmap.getTopics().size() + " TOPICS");
+        // System.out.println("node2 " + nCreator.cTopicmap.getTopics().size() +
+        // " TOPICS");
         // System.out.println(this.index);
         // System.out.println(this.name);
         // System.out.println(this.nodetype);
@@ -153,7 +155,7 @@ public class Node {
         // xx.fun(123, "asd");
         // xx.fun(332, "ggd");
 
-        System.out.println("\nNode DONE!!");
+        System.out.println("\n Node DONE!!");
     }
 
 }
@@ -166,7 +168,7 @@ class Scene extends Node {
     }
 
     Scene(int i, String s, Node pNode) throws IOException {
-        super(i, s, NodeType.Scene, pNode, null);
+        super(i, s, null, NodeType.Scene, pNode, null);
     }
 }
 
@@ -178,7 +180,7 @@ class Data extends Node {
     }
 
     Data(int i, String s, Node pNode) throws IOException {
-        super(i, s, NodeType.Data, pNode, null);
+        super(i, s, null, NodeType.Data, pNode, null);
     }
 }
 
@@ -190,6 +192,6 @@ class Value extends Node {
     }
 
     Value(int i, String s, Node pNode) throws IOException {
-        super(i, s, NodeType.Value, pNode, null);
+        super(i, s, null, NodeType.Value, pNode, null);
     }
 }

@@ -38,8 +38,12 @@ public class NodeTree {
 
     // private static Node kamiNode = null;
 
+    static TopicMapIF aTopicmap = null;
+    static XTMTopicMapReader aReader = null;
+    static TopicMapBuilderIF aBuilder = null;
+
     // 初始化，根节点，xtm
-    NodeTree() throws IOException {
+    public NodeTree() throws IOException {
 
         // TODO 读取xtm中的tm 重做
         /*        
@@ -60,20 +64,25 @@ public class NodeTree {
         */
 
         // 重做2
-        XtmCreator xCreator = new XtmCreator();
-//        TopicMapBuilderIF xBuilder = nCreator.cTopicmap.getBuilder();
-        System.out.println("nodetree1 " + xCreator.cTopicmap.getTopics().size()
-                + " TOPICS");
+//        XtmCreator xCreator = new XtmCreator();
+        // TopicMapBuilderIF xBuilder = nCreator.cTopicmap.getBuilder();
+//        System.out.println("nodetree1 " + xCreator.cTopicmap.getTopics().size()
+//                + " TOPICS");
 
         // TODO bug 无法写入TREE.xtm
-        Node kamiNode = new Node(-1, "KAMI", NodeType.Other, null, null);
-        sizeIncrease();
+//        Node kamiNode = new Node(-1, "KAMI", NodeType.Other, null, null);
+        
+
+        aReader = new XTMTopicMapReader(new File("hoho.xtm"));
+        aTopicmap = aReader.read();
+        aBuilder = aTopicmap.getBuilder();
+//        sizeIncrease();
 
         // write topic map to xtm
-        new XTMTopicMapWriter(xCreator.getXTM()).write(xCreator.cTopicmap);
+        new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
 
         // System.out.println(getSize());
-        System.out.println("nodetree2" + xCreator.cTopicmap.getTopics().size()
+        System.out.println("nodetree2" + aTopicmap.getTopics().size()
                 + " TOPICS");
 
         // tStore.commit();
@@ -93,7 +102,7 @@ public class NodeTree {
 
         Node pNode = FindNode(pIndex);
 
-        // TODO 在输的根节点添加节点，将父节点设置为kamiNode
+        // TODO 在树的根节点添加节点，将父节点设置为kamiNode
         if (pIndex == -1) {
             // pNode = kamiNode;
         }
@@ -103,9 +112,9 @@ public class NodeTree {
         }
 
         // TODO new topic addTopic
-        Node addNode = new Node(addIndex, addName, nt, pNode, null);
+//        Node addNode = new Node(addIndex, addName, nt, pNode, null);
 
-        pNode.getLeafList().add(addNode);
+//        pNode.getLeafList().add(addNode);
         sizeIncrease();
 
         if (nt == NodeType.Scene) {
@@ -165,17 +174,22 @@ public class NodeTree {
 
     // for test
     public static void fun(int iii, String sss) throws IOException {
-        TopicMapStoreIF xStore = new InMemoryTopicMapStore();
-        TopicMapIF xTopicmap = xStore.getTopicMap();
 
-        TopicMapImporterIF xReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        xReader.importInto(xTopicmap);
+//        XtmCreator nCreator = new XtmCreator();
+//        new XTMTopicMapWriter(nCreator.getXTM()).write(nCreator.cTopicmap);
 
-        TopicMapBuilderIF xBuilder = xTopicmap.getBuilder();
+        // TopicMapStoreIF xStore = new InMemoryTopicMapStore();
+        // TopicMapIF xTopicmap = xStore.getTopicMap();
+        //
+        // TopicMapImporterIF xReader = new XTMTopicMapReader(new
+        // File("TREE.xtm"));
+        // xReader.importInto(xTopicmap);
+        //
+        // TopicMapBuilderIF xBuilder = xTopicmap.getBuilder();
 
         // TopicIF hh = xBuilder.makeTopic();
         // xBuilder.makeTopicName(hh, "hooooo");
-        Node s = new Node(iii, sss, NodeType.Scene, null, null);
+        // Node s = new Node(iii, sss, NodeType.Scene, null, null);
         //
         // System.out.println(s.getIndex());
         // System.out.println(s.getName());
@@ -187,27 +201,36 @@ public class NodeTree {
 
         // new XTMTopicMapWriter("TREE.xtm").write(xTopicmap);
 
-        xStore.commit();
-        xStore.close();
+        // xStore.commit();
+        // xStore.close();
+        
+        
     }
 
     // for test
     public static void main(String[] args) throws IOException {
+        // TODO 读取xtm中的tm 重做
+        /*        
+        // 原始版本
+        TopicMapStoreIF tStore = new InMemoryTopicMapStore();
+        TopicMapIF tTopicmap = tStore.getTopicMap();
 
-        // TODO 重做
-        XTMTopicMapReader mReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        TopicMapIF mTopicmap = mReader.read();
-        TopicMapBuilderIF mBuilder = mTopicmap.getBuilder();
-        /*
-        TopicMapStoreIF mStore = new InMemoryTopicMapStore();
-        TopicMapIF mTopicmap = mStore.getTopicMap();
+        TopicMapImporterIF tReader = new XTMTopicMapReader(new File("TREE.xtm"));
+        tReader.importInto(tTopicmap);
 
-        TopicMapImporterIF mReader = new XTMTopicMapReader(new File("TREE.xtm"));
-        mReader.importInto(mTopicmap);
-
-        TopicMapBuilderIF mBuilder = mTopicmap.getBuilder();
-        System.out.println("mmmmm " + mTopicmap.getTopics().size() + " TOPICS");
+        TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
         */
+        // 重做1
+        /*        
+        XTMTopicMapReader tReader = new XTMTopicMapReader(new File("TREE.xtm"));
+        TopicMapIF tTopicmap = tReader.read();
+        TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
+        */
+
+        // 重做2
+//        XtmCreator nCreator = new XtmCreator();
+        // TopicMapBuilderIF xBuilder = nCreator.cTopicmap.getBuilder();
+
         /*
                 // TODO 读取已存在的XTM文件，在此XTM中进行添加删除
                 TopicMapStoreIF store = new InMemoryTopicMapStore();
@@ -228,9 +251,11 @@ public class NodeTree {
             System.out.println("=================");
         */
 
-        System.out.println("main1 " + mTopicmap.getTopics().size() + " TOPICS");
-        NodeTree tree = new NodeTree();
-        System.out.println("main2 " + mTopicmap.getTopics().size() + " TOPICS");
+//        System.out.println("main1 " + nCreator.cTopicmap.getTopics().size()
+//                + " TOPICS");
+//        NodeTree tree = new NodeTree();
+//        System.out.println("main2 " + nCreator.cTopicmap.getTopics().size()
+//                + " TOPICS");
         // Node kamiNode = new Node(-1, "Kami", NodeType.Other, null, null);
         // mStore.commit();
         // mStore.close();
@@ -240,11 +265,17 @@ public class NodeTree {
 
         // Node kamiNode = new Node(-1, "Kami", NodeType.Other, null, null);
         // Node hh = new Node(11, "haha", NodeType.Data, null, null);
-        System.out.println(tree.getSize());
+//        System.out.println(tree.getSize());
 
         // System.out.println("mmmmm " + mTopicmap.getTopics().size() +
         // " TOPICS");
 
+
+        NodeTree nt = new NodeTree();
+//        nt.AddNode(0, "", 1, "haha", NodeType.Other);
+//        nt.DeleteNode(1, "haha");
+//        
+        
         System.out.println("\n nodetree DONE");
     }
 }
