@@ -16,112 +16,117 @@ import net.ontopia.topicmaps.core.TopicIF;
 
 public class Node {
 
-	// node type
-	public enum NodeType {
-		Scene("scene"), Data("data"), Value("value"), Other("other");
+    // node type
+    public enum NodeType {
+        Scene("scene"), Data("data"), Value("value"), Root("root");
 
-		private String type;
+        private String type;
 
-		private NodeType() {
-			this(null);
-		}
+        private NodeType() {
+            this(null);
+        }
 
-		private NodeType(String s) {
-			this.type = s;
-		}
+        private NodeType(String s) {
+            this.type = s;
+        }
 
-		public String getString() {
-			return this.type;
-		}
-	}
+        public String getString() {
+            return this.type;
+        }
+    }
 
-	//
-	private int index;
-	private String name;
-	private TopicIF topic;
-	private NodeType nodeType;
-	private Node parentNode;
-	private ArrayList<Node> leafList;
+    //
+    private int index;
+    private String name;
+    private TopicIF topic;
+    private NodeType nodeType;
+    private Node parentNode;
+    private ArrayList<Node> childList;
 
-	public Node() throws IOException {
-		this(0, null, null, null, null, null);
-	}
+    public Node() throws IOException {
+        this(0, null, null, null, null, null);
+        // this(0, null, null, null, null);
+    }
 
-	public Node(int nIndex, String nName, TopicIF nTopic, NodeType nNodeType,
-			Node nParentNode, ArrayList<Node> nLeafList) throws IOException {
+    public Node(int nIndex, String nName, TopicIF nTopic, NodeType nNodeType,
+            Node nParentNode, ArrayList<Node> nChildList) throws IOException {
+        // Node nParentNode) throws IOException {
 
-		//
-		this.index = nIndex;
-		this.name = nName;
-		this.topic = nTopic;
-		this.nodeType = nNodeType;
-		this.parentNode = nParentNode;
-		this.leafList = nLeafList;
-	}
+        //
+        this.index = nIndex;
+        this.name = nName;
+        this.topic = nTopic;
+        this.nodeType = nNodeType;
+        this.parentNode = nParentNode;
+        this.childList = nChildList;
+    }
 
-	public int getIndex() {
-		return this.index;
-	}
+    public int getIndex() {
+        return this.index;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public TopicIF getTopic() {
-		return this.topic;
-	}
+    public TopicIF getTopic() {
+        return this.topic;
+    }
 
-	public NodeType getNodeType() {
-		return this.nodeType;
-	}
+    public NodeType getNodeType() {
+        return this.nodeType;
+    }
 
-	public Node getParentNode() {
-		return this.parentNode;
-	}
+    public Node getParentNode() {
+        return this.parentNode;
+    }
 
-	public ArrayList<Node> getLeafList() {
-		return this.leafList;
-	}
+    public ArrayList<Node> getChildList() {
+        return this.childList;
+    }
 
-	// for test
-	public static void main(String[] args) throws IOException {
+    // for test
+    public static void main(String[] args) throws IOException {
 
-		System.out.println("\n Node DONE!!");
-	}
+        System.out.println("\n Node DONE!!");
+    }
 }
 
 // scene node
 class Scene extends Node {
 
-	Scene() throws IOException {
-		super();
-	}
+    Scene() throws IOException {
+        super();
+    }
 
-	Scene(int sIndex, String sName, Node sParentNode) throws IOException {
-		super(sIndex, sName, null, NodeType.Value, sParentNode, null);
-	}
+    Scene(int sIndex, String sName, Node sParentNode) throws IOException {
+        super(sIndex, sName, null, NodeType.Value, sParentNode, null);
+        // super(sIndex, sName, null, NodeType.Value, sParentNode);
+    }
 }
 
 // data node
 class Data extends Node {
 
-	Data() throws IOException {
-		super();
-	}
+    Data() throws IOException {
+        super();
+    }
 
-	Data(int dIndex, String dName, Node dParentNode) throws IOException {
-		super(dIndex, dName, null, NodeType.Value, dParentNode, null);
-	}
+    Data(int dIndex, String dName, Node dParentNode) throws IOException {
+        super(dIndex, dName, null, NodeType.Value, dParentNode, null);
+        // super(dIndex, dName, null, NodeType.Value, dParentNode);
+    }
 }
 
 // value node
 class Value extends Node {
 
-	Value() throws IOException {
-		super();
-	}
+    Value() throws IOException {
+        super();
+    }
 
-	Value(int vIndex, String vName, Node vParentNode) throws IOException {
-		super(vIndex, vName, null, NodeType.Value, vParentNode, null);
-	}
+    Value(int vIndex, String vName, Node vParentNode) throws IOException {
+        super(vIndex, vName, null, NodeType.Value, vParentNode, null);
+        // super(vIndex, vName, null, NodeType.Value, vParentNode);
+    }
 }
