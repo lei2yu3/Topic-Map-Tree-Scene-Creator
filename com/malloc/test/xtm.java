@@ -27,7 +27,6 @@ public class xtm {
         aTopicmap = aReader.read();
         aBuilder = aTopicmap.getBuilder();
 
-
     }
 
     public void init() throws IOException {
@@ -47,12 +46,27 @@ public class xtm {
         new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
     }
 
+    public static int fun(int n) {
+        System.out.println("n = " + n);
+//        if (n > 0) {
+            if (n == 1) {
+                return 1;
+            } else {
+                return n + fun(n - 1);
+                // return n * fun(n - 1);
+            }
+    }
+
     public static void main(String[] args) throws IOException {
 
+        // xtm x = new xtm();
+        // x.init();
 
-        xtm x = new xtm();
-        x.init();
-        
+        System.out.println(fun(10));
+        System.out.println(fun(4));
+        System.out.println(fun(2));
+        System.out.println(fun(1));
+
         System.out.println("\n xtm DONE");
     }
 }

@@ -4,6 +4,8 @@ package com.malloc.tree;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.malloc.test.node;
+
 import net.ontopia.topicmaps.core.TopicIF;
 //import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 //import net.ontopia.topicmaps.core.TopicMapIF;
@@ -58,7 +60,8 @@ public class Node {
         this.topic = nTopic;
         this.nodeType = nNodeType;
         this.parentNode = nParentNode;
-        this.childList = nChildList;
+//        this.childList = nChildList;
+        this.childList = new ArrayList<Node>();
     }
 
     public int getIndex() {

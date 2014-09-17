@@ -9,6 +9,8 @@ import java.util.TreeSet;
 
 import com.malloc.tree.Node.NodeType;
 
+import net.ontopia.topicmaps.core.AssociationIF;
+import net.ontopia.topicmaps.core.AssociationRoleIF;
 import net.ontopia.topicmaps.core.TopicIF;
 import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 import net.ontopia.topicmaps.core.TopicMapIF;
@@ -67,7 +69,7 @@ public class Tree {
     // initialize root node and xtm file
     public Tree() throws IOException {
 
-        // TODO 读取xtm中的tm 重做
+        // 读取xtm中的tm 重做
         /*
          * // 原始版本 TopicMapStoreIF tStore = new InMemoryTopicMapStore();
          * TopicMapIF tTopicmap = tStore.getTopicMap();
@@ -120,33 +122,85 @@ public class Tree {
             String addName, NodeType nt) throws IOException {
 
         int treeSize = getSize();
-        int newTreeSize = 0;
 
-        Node pNode = FindNode(pIndex);
+        TopicIF topicAdd = aBuilder.makeTopic();
+        aBuilder.makeTopicName(topicAdd, addName);
 
-        // TODO 在树的根节点添加节点，将父节点设置为kamiNode
+        // 在树的根节点添加节点，将父节点设置为kamiNode
         if (pIndex == -1) {
-            // pNode = kamiNode;
+            // meke association rs
+            Node addNode = new Node(addIndex, addName, topicAdd, nt, nodeKami,
+                    null);
+
+            AssociationIF aRS = aBuilder.makeAssociation(topicSS);
+            // AssociationRoleIF arRoot =
+            aBuilder.makeAssociationRole(aRS, topicRoot, topicKami);
+            // AssociationRoleIF arScene =
+            aBuilder.makeAssociationRole(aRS, topicScene, topicAdd);
+
+//          addNode.getParentNode() = nodeKami;
+            nodeKami.getChildList().add(addNode);
+        } else {
+
+            // 不是根节点，则需根据index查找结点 TODO
+            Node pNode = FindNode(pIndex);
+
+            if (nt == NodeType.Scene) {
+
+                // meke association ss
+                Node addNode = new Node(addIndex, addName, topicAdd,
+                        NodeType.Scene, pNode, null);
+
+                AssociationIF aSS = aBuilder.makeAssociation(topicSS);
+                // AssociationRoleIF arParentScene =
+                aBuilder.makeAssociationRole(aSS, topicParentScene,
+                        pNode.getTopic());
+                // AssociationRoleIF arChildScene =
+                aBuilder.makeAssociationRole(aSS, topicChildScene, topicAdd);
+
+//              addNode.getParentNode() = pNode;
+                pNode.getChildList().add(addNode);
+                sizeIncrease();
+
+            } else if (nt == NodeType.Data) {
+
+                // meke association sd
+                Node addNode = new Node(addIndex, addName, topicAdd,
+                        NodeType.Data, pNode, null);
+
+                AssociationIF aSD = aBuilder.makeAssociation(topicSD);
+                // AssociationRoleIF arScene =
+                aBuilder.makeAssociationRole(aSD, topicScene, pNode.getTopic());
+                // AssociationRoleIF arData =
+                aBuilder.makeAssociationRole(aSD, topicData, topicAdd);
+
+//              addNode.getParentNode() = pNode;
+                pNode.getChildList().add(addNode);
+                sizeIncrease();
+
+            } else if (nt == NodeType.Value) {
+
+                // meke association dv
+                Node addNode = new Node(addIndex, addName, topicAdd,
+                        NodeType.Value, pNode, null);
+
+                AssociationIF aDV = aBuilder.makeAssociation(topicDV);
+                // AssociationRoleIF arData =
+                aBuilder.makeAssociationRole(aDV, topicData, pNode.getTopic());
+                // AssociationRoleIF arValue =
+                aBuilder.makeAssociationRole(aDV, topicValue, topicAdd);
+
+//                addNode.getParentNode() = pNode;
+                pNode.getChildList().add(addNode);
+                sizeIncrease();
+
+            }
+
         }
-
-        // TODO new topic addTopic
-        // Node addNode = new Node(addIndex, addName, nt, pNode, null);
-
-        // pNode.getChildList().add(addNode);
-        sizeIncrease();
-
-        if (nt == NodeType.Scene) {
-            // TODO meke association ss
-        } else if (nt == NodeType.Data) {
-            // TODO meke association sd
-
-        } else if (nt == NodeType.Value) {
-            // TODO meke association dv
-
-        }
-
-        // TODO modify tm, save to xtm
+        // modify tm, save to xtm
         new XTMTopicMapWriter(XTM).write(aTopicmap);
+
+        int newTreeSize = getSize();
 
         return newTreeSize == treeSize + 1 ? true : false;
 
@@ -159,29 +213,67 @@ public class Tree {
     public boolean DeleteNode(int delIndex, String delName) throws IOException {
 
         int treeSize = getSize();
-        int newTreeSize = 0;
         int deteleSize = 0;
 
-        Node delNode = FindNode(delIndex);
+        Node delParentNode = FindNode(delIndex).getParentNode();
 
         // TODO 深度优先遍历以delNode为根的子树，（保存为ArrayList）依次删除
-        // sizeDecrease();deteleSize++;
+        if (delParentNode.getChildList() != null
+                || delParentNode.getChildList().size() != 0) {
 
-        // TODO modify tm, save to xtm
+            for (int i = 0; i < delParentNode.getChildList().size(); i++) {
+                // if (delParentNode.getChildList().get(i).getChildList() ==
+                // null
+                // || delParentNode.getChildList().get(i).getChildList().size()
+                // == 0) {
+                if (delParentNode.getChildList().get(i).getChildList()
+                        .isEmpty()) {
+
+                    // remove topic in tm
+                    delParentNode.getChildList().get(i).getTopic().remove();
+
+                    // remove node in child list
+                    delParentNode.getChildList().remove(i);
+//                    delParentNode.getChildList().get(i).getParentNode() = null;
+                    sizeDecrease();
+                    deteleSize++;
+
+                } else {
+                    // TODO 递归
+                }
+            }
+        }
+
+        // modify tm, save to xtm
         new XTMTopicMapWriter(XTM).write(aTopicmap);
 
+        int newTreeSize = getSize();
         return newTreeSize == treeSize - deteleSize ? true : false;
 
     }
 
     // 深度遍历查找指定index的Node，返回该节点
     // find
+    // public Node FindNode(int targetNodeIndex, Node r) throws IOException {
     public Node FindNode(int targetNodeIndex) throws IOException {
 
-        Node targetNode = null;
+        Node targetNode = FindNode(targetNodeIndex);
 
         // TODO 深度优先遍历树，查找指定index的节点
+        // if (targetNode.getChildList() != null &&
+        // targetNode.getChildList().size() != 0) {
+        if (!targetNode.getChildList().isEmpty()) {
+            for (int i = 0; i < targetNode.getChildList().size(); i++) {
 
+                if (targetNode.getChildList().get(i).getIndex() == targetNodeIndex) {
+                    return targetNode.getChildList().get(i);
+                } else {
+                    // TODO
+                    // FindNode(targetNodeIndex, r);
+                }
+            }
+
+        }
         return targetNode;// TODO 返回查找到的节点
     }
 
