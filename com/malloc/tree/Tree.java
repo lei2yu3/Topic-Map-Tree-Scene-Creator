@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+
 import com.malloc.tree.Node.NodeType;
 
 import net.ontopia.topicmaps.core.AssociationIF;
@@ -69,30 +70,6 @@ public class Tree {
     // initialize root node and xtm file
     public Tree() throws IOException {
 
-        // 读取xtm中的tm 重做
-        /*
-         * // 原始版本 TopicMapStoreIF tStore = new InMemoryTopicMapStore();
-         * TopicMapIF tTopicmap = tStore.getTopicMap();
-         * 
-         * TopicMapImporterIF tReader = new XTMTopicMapReader(new
-         * File("TREE.xtm")); tReader.importInto(tTopicmap);
-         * 
-         * TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
-         */
-        // 重做1
-        /*
-         * XTMTopicMapReader tReader = new XTMTopicMapReader(new
-         * File("TREE.xtm")); TopicMapIF tTopicmap = tReader.read();
-         * TopicMapBuilderIF tBuilder = tTopicmap.getBuilder();
-         */
-
-        // 重做2
-        // XtmCreator xCreator = new XtmCreator();
-        // TopicMapBuilderIF xBuilder = nCreator.cTopicmap.getBuilder();
-        // System.out.println("nodetree1 " +
-        // xCreator.cTopicmap.getTopics().size()
-        // + " TOPICS");
-
         // create xtm with empty topic map
         new XTMTopicMapWriter(XTM).write(new InMemoryTopicMapStore()
                 .getTopicMap());
@@ -143,7 +120,7 @@ public class Tree {
         } else {
 
             // 不是根节点，则需根据index查找结点 TODO
-            Node pNode = FindNode(pIndex);
+            Node pNode = null;// = FindNode(pIndex);
 
             if (nt == NodeType.Scene) {
 
@@ -215,7 +192,8 @@ public class Tree {
         int treeSize = getSize();
         int deteleSize = 0;
 
-        Node delParentNode = FindNode(delIndex).getParentNode();
+        // TODO 查找方法纯重做
+        Node delParentNode = FindNode(delIndex, new Node()).getParentNode();
 
         // TODO 深度优先遍历以delNode为根的子树，（保存为ArrayList）依次删除
         if (delParentNode.getChildList() != null
@@ -255,24 +233,21 @@ public class Tree {
     // 深度遍历查找指定index的Node，返回该节点
     // find
     // public Node FindNode(int targetNodeIndex, Node r) throws IOException {
-    public Node FindNode(int targetNodeIndex) throws IOException {
+    public Node FindNode(int targetNodeIndex, Node tempNode) throws IOException {
+    	
+    	// TODO 已重做。需验证
+        Node targetNode = null;
 
-        Node targetNode = FindNode(targetNodeIndex);
-
-        // TODO 深度优先遍历树，查找指定index的节点
-        // if (targetNode.getChildList() != null &&
-        // targetNode.getChildList().size() != 0) {
-        if (!targetNode.getChildList().isEmpty()) {
-            for (int i = 0; i < targetNode.getChildList().size(); i++) {
-
-                if (targetNode.getChildList().get(i).getIndex() == targetNodeIndex) {
-                    return targetNode.getChildList().get(i);
-                } else {
-                    // TODO
-                    // FindNode(targetNodeIndex, r);
-                }
+        if (tempNode.getIndex() == targetNodeIndex){
+        	targetNode = tempNode;
+        } else if (!tempNode.getChildList().isEmpty()){
+        	
+            for (int j = 0; j < tempNode.getChildList().size() && targetNode == null; ++j){
+                System.out.println("esle " + tempNode.getChildList().get(j).getIndex() + " ,"
+                        + tempNode.getChildList().get(j).getName());
+                targetNode = FindNode(targetNodeIndex, tempNode.getChildList().get(j));
             }
-
+        	
         }
         return targetNode;// TODO 返回查找到的节点
     }
@@ -281,7 +256,11 @@ public class Tree {
     public void init() throws IOException {
 
         // ParentScene-ChildScene, Root-Scene, Scene-Data, Data-Value
-
+    	
+    	// root node in r-s
+    	topicRoot = aBuilder.makeTopic();
+        TopicNameIF tnRoot = aBuilder.makeTopicName(topicRoot, "Root");
+        
         // parent scene node in s-s
         topicParentScene = aBuilder.makeTopic();
         TopicNameIF tnParentScene = aBuilder.makeTopicName(topicParentScene,

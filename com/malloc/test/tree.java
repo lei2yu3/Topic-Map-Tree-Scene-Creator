@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import net.ontopia.topicmaps.core.AssociationIF;
 import net.ontopia.topicmaps.core.TopicIF;
 import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 import net.ontopia.topicmaps.core.TopicMapIF;
+import net.ontopia.topicmaps.core.TopicNameIF;
 import net.ontopia.topicmaps.impl.basic.InMemoryTopicMapStore;
 import net.ontopia.topicmaps.xml.XTMTopicMapReader;
 import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
@@ -37,6 +39,9 @@ public class tree {
 
     public static node nodeBigBro = null;
     public TopicIF topicBigBro = null;
+    public TopicIF topicRS = null;
+    public TopicIF topicRoot = null;
+    public TopicIF topicScene = null;
 
     ArrayList<node> an = new ArrayList<node>();
 
@@ -53,7 +58,16 @@ public class tree {
         aBuilder.makeTopicName(topicBigBro, "BigBro");
         nodeBigBro = new node(-1, "BigBro", topicBigBro, null, null);
         sizeIncrease();
+        
 
+        topicRS = aBuilder.makeTopic();
+        TopicNameIF tnRS = aBuilder.makeTopicName(topicRS, "Root-Scene");
+        topicScene = aBuilder.makeTopic();
+        TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
+    	topicRoot = aBuilder.makeTopic();
+        TopicNameIF tnRoot = aBuilder.makeTopicName(topicRoot, "Root");
+        
+/*
         TopicIF topic1 = aBuilder.makeTopic();
         aBuilder.makeTopicName(topic1, "#1");
         node node1 = new node(1, "#1", topic1, null, null);
@@ -123,7 +137,7 @@ public class tree {
         // node4.parentNode = nodeBigBro;
         nodeBigBro.childList.add(node4);
         sizeIncrease();
-
+*/
         new XTMTopicMapWriter(XTM).write(aTopicmap);
 
     }
@@ -132,16 +146,23 @@ public class tree {
             String addName) throws IOException {
 
         int treeSize = getSize();
-        int newTreeSize = 0;
 
+        node p = ha(pIndex, nodeBigBro);
+        
         TopicIF tt = aBuilder.makeTopic();
         aBuilder.makeTopicName(tt, addName);
 
-        node n = new node(addIndex, addName, tt, null, null);
+        AssociationIF aRS = aBuilder.makeAssociation(topicRS);
+        aBuilder.makeAssociationRole(aRS, topicRoot, topicBigBro);
+        aBuilder.makeAssociationRole(aRS, topicScene, tt);
+        
+        node add = new node(addIndex, addName, tt, p, null);
+        p.childList.add(add);
         sizeIncrease();
 
         new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
 
+        int newTreeSize = getSize();
         return newTreeSize == treeSize + 1 ? true : false;
 
     }
@@ -161,67 +182,67 @@ public class tree {
 
     }
 
-    public void FindNode(int num, node r) throws IOException {
+    public node FindNode(int num, node r) throws IOException {
 
-        node newNode = new node();
-        String s = "bb";
+        node newNode = null;
+
         // 以传入的节点为根，深度优先遍历
-        if (r.childList != null && r.childList.size() != 0) {
-            System.out.println("if r.childList is not null!");
-            for (int i = 0; i < r.childList.size(); i++) {
-                System.out.println("==" + r.childList.get(i).index + " ,"
-                        + r.childList.get(i).name);
-                if (r.childList.get(i).index == num) {
-                    System.out.println("find " + r.childList.get(i).index
-                            + " ," + r.childList.get(i).name);
-                    // return r.childList.get(i);
-                    return;
-                } else {
-                    System.out.println("else " + r.childList.get(i).index
-                            + " ," + r.childList.get(i).name);
-
-                    FindNode(num, r.childList.get(i));
-                }
-
-                // for (node n : r.childList) {
-                // System.out.println("n.index = " + n.index + "; n.name = "
-                // + n.name);
-                // newNode = n;
-                // if (n.index != num) {
-                // FindNode(num, newNode);
-                // } else {
-                // System.out.println("==" + (newNode.index == num));
-                // return newNode;
-                // }
+        if (r.index == num){
+        	newNode = r;
+        } else if (!r.childList.isEmpty()){
+        	
+            for (int j = 0; j < r.childList.size() && newNode == null; ++j){
+                System.out.println("esle " + r.childList.get(j).index + " ,"
+                        + r.childList.get(j).name);
+                newNode = ha(num, r.childList.get(j));
             }
+        	
         }
+//        if (r.childList != null && r.childList.size() != 0) {
+//            System.out.println("if r.childList is not null!");
+//            for (int i = 0; i < r.childList.size(); i++) {
+//                System.out.println("==" + r.childList.get(i).index + " ,"
+//                        + r.childList.get(i).name);
+//                if (r.childList.get(i).index == num) {
+//                    System.out.println("find " + r.childList.get(i).index
+//                            + " ," + r.childList.get(i).name);
+//                    // return r.childList.get(i);
+//                    return;
+//                } else {
+//                    System.out.println("else " + r.childList.get(i).index
+//                            + " ," + r.childList.get(i).name);
+//
+//                    FindNode(num, r.childList.get(i));
+//                }
+//            }
+//        }
 
         // 没找到
-        // return newNode;
+         return newNode;
     }
 
+    // TODO 按index查找节点完成，已移植，待验证
     public node ha(int num, node r) {
         node returnNode = null;
-        int i = 0;
+//        int i = 0;
 
         if (r.index == num) {
-            System.out.println("find " + r.childList.get(i).index + " ,"
-                    + r.childList.get(i).name);
+            System.out.println("find " + r.index + " ," + r.name);
             returnNode = r;
         } else if (!r.childList.isEmpty()) {
-            i = 0;
-            while (returnNode == null && i < r.childList.size()) {
-                System.out.println("esle " + r.childList.get(i).index + " ,"
-                        + r.childList.get(i).name);
-                returnNode = ha(num, r.childList.get(i));
-                ++i;
-            }
-            
-//            for (int j = 0; j < r.childList.size() && returnNode == null; ++j){
-//                System.out.println("esle " + r.childList.get(j).index + " ,"
-//                        + r.childList.get(j).name);
-//                returnNode = ha(num, r.childList.get(j));
+//            i = 0;
+//            while (returnNode == null && i < r.childList.size()) {
+//                System.out.println("esle " + r.childList.get(i).index + " ,"
+//                        + r.childList.get(i).name);
+//                returnNode = ha(num, r.childList.get(i));
+//                ++i;
 //            }
+            
+            for (int j = 0; j < r.childList.size() && returnNode == null; ++j){
+                System.out.println("esle " + r.childList.get(j).index + " ,"
+                        + r.childList.get(j).name);
+                returnNode = ha(num, r.childList.get(j));
+            }
         }
 
         return returnNode;
@@ -250,12 +271,17 @@ public class tree {
 
     public static void main(String[] args) throws IOException {
         tree t = new tree();
+        System.out.println(t.addNode(-1, "BigBro", 1, "node1"));
+        System.out.println("topic in tm: " + aTopicmap.getTopics().size());
+        t.FindNode(1, nodeBigBro).topic.remove();
+        System.out.println("topic in tm: " + aTopicmap.getTopics().size());
+        
         // t.FindNode(32, nodeBigBro);
         // System.out.println("\nmain " + t.FindNode(21, nodeBigBro).name);
 
-        int a = 3;
-        System.out.println("finding : " + a + "\n");
-        t.ha(3, nodeBigBro);
+//        int a = 32;
+//        System.out.println("finding : " + a + "\n");
+//        t.ha(a, nodeBigBro);
 //        System.out.println(t.ha(a, nodeBigBro).index);
 
 //        t.ha(1, nodeBigBro);
