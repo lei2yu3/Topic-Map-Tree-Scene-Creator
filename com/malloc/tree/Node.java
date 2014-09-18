@@ -58,7 +58,8 @@ public class Node {
         this.topic = nTopic;
         this.nodeType = nNodeType;
         this.parentNode = nParentNode;
-//        this.childList = nChildList;
+        // this.childList = nChildList;
+        // TODO 为避免容器自动扩容时影响性能，可以指定创建时的元素大小。
         this.childList = new ArrayList<Node>();
     }
 
@@ -80,6 +81,10 @@ public class Node {
 
     public Node getParentNode() {
         return this.parentNode;
+    }
+
+    public void setParentNode(Node n) {
+        this.parentNode = n;
     }
 
     public ArrayList<Node> getChildList() {

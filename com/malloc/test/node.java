@@ -1,18 +1,9 @@
 package com.malloc.test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.malloc.tree.Node;
-import com.malloc.tree.Node.NodeType;
-
 import net.ontopia.topicmaps.core.TopicIF;
-import net.ontopia.topicmaps.core.TopicMapBuilderIF;
-import net.ontopia.topicmaps.core.TopicMapIF;
-import net.ontopia.topicmaps.core.TopicNameIF;
-import net.ontopia.topicmaps.xml.XTMTopicMapReader;
-import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
 
 public class node {
 

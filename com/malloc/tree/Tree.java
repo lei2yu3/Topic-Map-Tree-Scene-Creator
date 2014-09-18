@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 
+
 import com.malloc.tree.Node.NodeType;
 
 import net.ontopia.topicmaps.core.AssociationIF;
@@ -38,16 +39,16 @@ public class Tree {
         return this.size;
     }
 
-    public int sizeIncrease() {
+    private int sizeIncrease() {
         return ++size;
     }
 
-    public int sizeDecrease() {
+    private int sizeDecrease() {
         return --size;
     }
 
     // topic map
-    TopicMapIF aTopicmap = null;
+    static TopicMapIF aTopicmap = null;
     XTMTopicMapReader aReader = null;
     TopicMapBuilderIF aBuilder = null;
 
@@ -90,37 +91,37 @@ public class Tree {
 
     }
 
-    // 参数 当前节点（即父节点）(index, nName)，待加入的节点的参数(index, name, nodetype)
-    // 返回 是否添加成功，父节点的getChildList长度是否加一
-    // 流程 根据pNode.getIndex()找到父节点，添加pNode.getChildList().add(addNode);
-    // 添加到树，然后根据pNode与addNode修改TM
-    // add
+    // parameter 当前节点（即父节点）的(index, name)，待添加节点的(index, name, nodetype)
+    // return 返回树的大小是否加一
+    // 查找父节点，添加子节点到父节点，添加关联到TM
     public boolean AddNode(int pIndex, String pName, int addIndex,
             String addName, NodeType nt) throws IOException {
 
         int treeSize = getSize();
 
+        // new a topic
         TopicIF topicAdd = aBuilder.makeTopic();
         aBuilder.makeTopicName(topicAdd, addName);
 
-        // 在树的根节点添加节点，将父节点设置为kamiNode
+        // 在树的根节点添加节点，将父节点直接设置为kamiNode
         if (pIndex == -1) {
             // meke association rs
             Node addNode = new Node(addIndex, addName, topicAdd, nt, nodeKami,
                     null);
 
-            AssociationIF aRS = aBuilder.makeAssociation(topicSS);
+            AssociationIF aRS = aBuilder.makeAssociation(topicRS);
             // AssociationRoleIF arRoot =
             aBuilder.makeAssociationRole(aRS, topicRoot, topicKami);
             // AssociationRoleIF arScene =
             aBuilder.makeAssociationRole(aRS, topicScene, topicAdd);
 
-//          addNode.getParentNode() = nodeKami;
+            addNode.setParentNode(nodeKami);
             nodeKami.getChildList().add(addNode);
+            sizeIncrease();
         } else {
 
-            // 不是根节点，则需根据index查找结点 TODO
-            Node pNode = null;// = FindNode(pIndex);
+            // 不是根节点，则需根据index查找结点
+            Node pNode = FindNode(pIndex);
 
             if (nt == NodeType.Scene) {
 
@@ -135,7 +136,7 @@ public class Tree {
                 // AssociationRoleIF arChildScene =
                 aBuilder.makeAssociationRole(aSS, topicChildScene, topicAdd);
 
-//              addNode.getParentNode() = pNode;
+                addNode.setParentNode(pNode);
                 pNode.getChildList().add(addNode);
                 sizeIncrease();
 
@@ -151,7 +152,7 @@ public class Tree {
                 // AssociationRoleIF arData =
                 aBuilder.makeAssociationRole(aSD, topicData, topicAdd);
 
-//              addNode.getParentNode() = pNode;
+                addNode.setParentNode(pNode);
                 pNode.getChildList().add(addNode);
                 sizeIncrease();
 
@@ -167,13 +168,13 @@ public class Tree {
                 // AssociationRoleIF arValue =
                 aBuilder.makeAssociationRole(aDV, topicValue, topicAdd);
 
-//                addNode.getParentNode() = pNode;
+                addNode.setParentNode(pNode);
                 pNode.getChildList().add(addNode);
                 sizeIncrease();
 
             }
-
         }
+
         // modify tm, save to xtm
         new XTMTopicMapWriter(XTM).write(aTopicmap);
 
@@ -183,18 +184,17 @@ public class Tree {
 
     }
 
-    // 参数 当前节点（即子节点）
-    // 返回 是否删除成功，父节点的getChildList是否为空
-    // 流程 遍历以delNode为根的子树，依次删除
-    // delete
+    // parameter 当前节点（即子节点）的(index, name)
+    // return 返回树的大小是否为与被删除节点个数相等
+    // 深度遍历以当前节点为根的子树，依次删除
     public boolean DeleteNode(int delIndex, String delName) throws IOException {
 
         int treeSize = getSize();
         int deteleSize = 0;
 
-        // TODO 查找方法纯重做
-        Node delParentNode = FindNode(delIndex, new Node()).getParentNode();
-
+        Node delNode = FindNode(delIndex);
+        Node delParentNode = delNode.getParentNode();
+                
         // TODO 深度优先遍历以delNode为根的子树，（保存为ArrayList）依次删除
         if (delParentNode.getChildList() != null
                 || delParentNode.getChildList().size() != 0) {
@@ -218,6 +218,10 @@ public class Tree {
 
                 } else {
                     // TODO 递归
+                    // 删除孩子节点列表
+                    sizeDecrease();
+                    delParentNode.getChildList().clear();
+                    deteleSize += delParentNode.getChildList().size();
                 }
             }
         }
@@ -230,26 +234,31 @@ public class Tree {
 
     }
 
-    // 深度遍历查找指定index的Node，返回该节点
-    // find
-    // public Node FindNode(int targetNodeIndex, Node r) throws IOException {
-    public Node FindNode(int targetNodeIndex, Node tempNode) throws IOException {
-    	
-    	// TODO 已重做。需验证
+    // 
+    public Node FindNode(int targetNodeInde) throws IOException {
+        return FindNode(targetNodeInde, nodeKami);
+    }
+    
+    // parameter 查找结点index，开始查找的node（当前根节点） 
+    // return 查找到则返回返回node，否则为null
+    // 深度遍历查找指定index的node，返回该节点
+    public Node FindNode(int findIndex, Node startNode) throws IOException {
+
         Node targetNode = null;
 
-        if (tempNode.getIndex() == targetNodeIndex){
-        	targetNode = tempNode;
-        } else if (!tempNode.getChildList().isEmpty()){
-        	
-            for (int j = 0; j < tempNode.getChildList().size() && targetNode == null; ++j){
-                System.out.println("esle " + tempNode.getChildList().get(j).getIndex() + " ,"
-                        + tempNode.getChildList().get(j).getName());
-                targetNode = FindNode(targetNodeIndex, tempNode.getChildList().get(j));
+        if (startNode.getIndex() == findIndex) {
+            System.out.println("find " + startNode.getIndex() + " ," + startNode.getName());
+            targetNode = startNode;
+        } else if (!startNode.getChildList().isEmpty()) {
+
+            for (int j = 0; j < startNode.getChildList().size() && targetNode == null; ++j) {
+                System.out.println("esle " + startNode.getChildList().get(j).getIndex() + " ,"
+                        + startNode.getChildList().get(j).getName());
+                targetNode = FindNode(findIndex, startNode.getChildList().get(j));
             }
-        	
         }
-        return targetNode;// TODO 返回查找到的节点
+
+        return targetNode;
     }
 
     // for test
@@ -276,12 +285,12 @@ public class Tree {
         TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
 
         // data node in s-d or d-v
-        topicData = aBuilder.makeTopic();
-        TopicNameIF tnData = aBuilder.makeTopicName(topicData, "Data");
-
-        // value node in d-v
-        topicValue = aBuilder.makeTopic();
-        TopicNameIF tnValue = aBuilder.makeTopicName(topicValue, "Value");
+//        topicData = aBuilder.makeTopic();
+//        TopicNameIF tnData = aBuilder.makeTopicName(topicData, "Data");
+//
+//        // value node in d-v
+//        topicValue = aBuilder.makeTopic();
+//        TopicNameIF tnValue = aBuilder.makeTopicName(topicValue, "Value");
 
         // association type node r-s
         topicRS = aBuilder.makeTopic();
@@ -292,12 +301,12 @@ public class Tree {
         TopicNameIF tnSS = aBuilder.makeTopicName(topicSS, "Scene-Scene");
 
         // association type node s-d
-        topicSD = aBuilder.makeTopic();
-        TopicNameIF tnSD = aBuilder.makeTopicName(topicSD, "Scene-Data");
-
-        // association type node d-v
-        topicDV = aBuilder.makeTopic();
-        TopicNameIF tnDV = aBuilder.makeTopicName(topicDV, "Data-Value");
+//        topicSD = aBuilder.makeTopic();
+//        TopicNameIF tnSD = aBuilder.makeTopicName(topicSD, "Scene-Data");
+//
+//        // association type node d-v
+//        topicDV = aBuilder.makeTopic();
+//        TopicNameIF tnDV = aBuilder.makeTopicName(topicDV, "Data-Value");
 
         new XTMTopicMapWriter(XTM).write(aTopicmap);
 
@@ -306,8 +315,28 @@ public class Tree {
     // for test
     public static void main(String[] args) throws IOException {
 
-        Tree nt = new Tree();
+        Tree t = new Tree();
+        t.init();
+        
+        System.out.println(" main\n");
+        System.out.println(t.FindNode(-1).getName().toString());
 
+        t.AddNode(-1, "Kami", 1, "@1", NodeType.Scene);
+        t.AddNode(-1, "Kami", 2, "#2", NodeType.Scene);
+        t.AddNode(-1, "Kami", 3, "$3", NodeType.Scene);
+        t.AddNode(2, "#2", 21, "#21", NodeType.Scene);
+        t.AddNode(2, "#2", 22, "#22", NodeType.Scene);
+        t.AddNode(3, "$3", 31, "$31", NodeType.Scene);
+        t.AddNode(3, "$3", 32, "$32", NodeType.Scene);
+        t.AddNode(31, "$31", 311, "$311", NodeType.Scene);
+        t.AddNode(-1, "Kami", 4, "%4", NodeType.Scene);
+        t.AddNode(32, "$32", 321, "$321", NodeType.Scene);
+        t.AddNode(32, "$32", 322, "$322", NodeType.Scene);
+
+        System.out.println(t.getSize());
+        System.out.println(aTopicmap.getTopics().size());
+        
+        
         // initialize topic map with basic topics and associations
         // nt.init();
 
@@ -315,7 +344,7 @@ public class Tree {
         // nt.AddNode(0, null, 0, null, NodeType.Scene);
         // nt.DeleteNode(0, null);
 
-        System.out.println("\n nodetree DONE");
+        System.out.println("\n Tree DONE");
 
     }
 }

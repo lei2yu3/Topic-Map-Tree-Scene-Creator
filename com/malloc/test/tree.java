@@ -3,6 +3,7 @@ package com.malloc.test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import net.ontopia.topicmaps.core.AssociationIF;
 import net.ontopia.topicmaps.core.TopicIF;
@@ -10,6 +11,7 @@ import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 import net.ontopia.topicmaps.core.TopicMapIF;
 import net.ontopia.topicmaps.core.TopicNameIF;
 import net.ontopia.topicmaps.impl.basic.InMemoryTopicMapStore;
+import net.ontopia.topicmaps.query.utils.QueryWrapper;
 import net.ontopia.topicmaps.xml.XTMTopicMapReader;
 import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
 
@@ -58,15 +60,14 @@ public class tree {
         aBuilder.makeTopicName(topicBigBro, "BigBro");
         nodeBigBro = new node(-1, "BigBro", topicBigBro, null, null);
         sizeIncrease();
-        
 
         topicRS = aBuilder.makeTopic();
         TopicNameIF tnRS = aBuilder.makeTopicName(topicRS, "Root-Scene");
         topicScene = aBuilder.makeTopic();
         TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
-    	topicRoot = aBuilder.makeTopic();
+        topicRoot = aBuilder.makeTopic();
         TopicNameIF tnRoot = aBuilder.makeTopicName(topicRoot, "Root");
-        
+
 /*
         TopicIF topic1 = aBuilder.makeTopic();
         aBuilder.makeTopicName(topic1, "#1");
@@ -147,15 +148,15 @@ public class tree {
 
         int treeSize = getSize();
 
-        node p = ha(pIndex, nodeBigBro);
-        
+        node p = FindNode(pIndex, nodeBigBro);
+
         TopicIF tt = aBuilder.makeTopic();
         aBuilder.makeTopicName(tt, addName);
 
         AssociationIF aRS = aBuilder.makeAssociation(topicRS);
         aBuilder.makeAssociationRole(aRS, topicRoot, topicBigBro);
         aBuilder.makeAssociationRole(aRS, topicScene, tt);
-        
+
         node add = new node(addIndex, addName, tt, p, null);
         p.childList.add(add);
         sizeIncrease();
@@ -167,8 +168,45 @@ public class tree {
 
     }
 
+    // TODO
     public boolean deleteNode(int deleteIndex, String deleteName)
             throws IOException {
+
+        int treeSize = getSize();
+        int newTreeSize = 0;
+        int deteleSize = 0;
+
+        // sizeDecrease();deteleSize++;
+
+        // new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
+
+        return newTreeSize == treeSize - deteleSize ? true : false;
+
+    }
+
+    public node FindNode(int num) throws IOException {
+        return FindNode(num, nodeBigBro);
+    }
+
+    public node FindNode(int num, node r) throws IOException {
+
+        node newNode = null;
+
+        if (r.index == num) {
+            newNode = r;
+        } else if (!r.childList.isEmpty()) {
+
+            for (int j = 0; j < r.childList.size() && newNode == null; ++j) {
+                System.out.println("esle " + r.childList.get(j).index + " ,"
+                        + r.childList.get(j).name);
+                newNode = FindNode(num, r.childList.get(j));
+            }
+        }
+        return newNode;
+    }
+
+    // TODO delete
+    public boolean del(int num, node r) throws IOException {
 
         int treeSize = getSize();
         int newTreeSize = 0;
@@ -179,128 +217,51 @@ public class tree {
         new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
 
         return newTreeSize == treeSize - deteleSize ? true : false;
-
     }
 
-    public node FindNode(int num, node r) throws IOException {
-
-        node newNode = null;
-
-        // 以传入的节点为根，深度优先遍历
-        if (r.index == num){
-        	newNode = r;
-        } else if (!r.childList.isEmpty()){
-        	
-            for (int j = 0; j < r.childList.size() && newNode == null; ++j){
-                System.out.println("esle " + r.childList.get(j).index + " ,"
-                        + r.childList.get(j).name);
-                newNode = ha(num, r.childList.get(j));
-            }
-        	
-        }
-//        if (r.childList != null && r.childList.size() != 0) {
-//            System.out.println("if r.childList is not null!");
-//            for (int i = 0; i < r.childList.size(); i++) {
-//                System.out.println("==" + r.childList.get(i).index + " ,"
-//                        + r.childList.get(i).name);
-//                if (r.childList.get(i).index == num) {
-//                    System.out.println("find " + r.childList.get(i).index
-//                            + " ," + r.childList.get(i).name);
-//                    // return r.childList.get(i);
-//                    return;
-//                } else {
-//                    System.out.println("else " + r.childList.get(i).index
-//                            + " ," + r.childList.get(i).name);
-//
-//                    FindNode(num, r.childList.get(i));
-//                }
-//            }
-//        }
-
-        // 没找到
-         return newNode;
-    }
-
-    // TODO 按index查找节点完成，已移植，待验证
-    public node ha(int num, node r) {
-        node returnNode = null;
-//        int i = 0;
-
-        if (r.index == num) {
-            System.out.println("find " + r.index + " ," + r.name);
-            returnNode = r;
-        } else if (!r.childList.isEmpty()) {
-//            i = 0;
-//            while (returnNode == null && i < r.childList.size()) {
-//                System.out.println("esle " + r.childList.get(i).index + " ,"
-//                        + r.childList.get(i).name);
-//                returnNode = ha(num, r.childList.get(i));
-//                ++i;
-//            }
-            
-            for (int j = 0; j < r.childList.size() && returnNode == null; ++j){
-                System.out.println("esle " + r.childList.get(j).index + " ,"
-                        + r.childList.get(j).name);
-                returnNode = ha(num, r.childList.get(j));
-            }
-        }
-
-        return returnNode;
-    }
-
-    public String he(int num, node r) {
-        String s = null;
-
-        for (int i = 0; i < r.childList.size(); i++) {
-            s = r.childList.get(i).name;
-            System.out.println("*** " + r.childList.get(i).index + " " + s);
-            if (r.childList.get(i).index == num) {
-                System.out.println("find " + r.childList.get(i).index + " ,"
-                        + r.childList.get(i).name);
-                return s;
-            } else if (r.childList.get(i).index != num) {
-                System.out.println("esle " + r.childList.get(i).index + " ,"
-                        + r.childList.get(i).name);
-                ha(num, r.childList.get(i));
-            }
-
-        }
-
-        return s;
-    }
 
     public static void main(String[] args) throws IOException {
         tree t = new tree();
         System.out.println(t.addNode(-1, "BigBro", 1, "node1"));
-        System.out.println("topic in tm: " + aTopicmap.getTopics().size());
-        t.FindNode(1, nodeBigBro).topic.remove();
+        System.out.println(t.addNode(-1, "BigBro", 2, "node2"));
+        System.out.println(t.addNode(-1, "BigBro", 3, "node3"));
         System.out.println("topic in tm: " + aTopicmap.getTopics().size());
         
+        // t.FindNode(1, nodeBigBro).topic.remove();
+        // t.FindNode(1).topic.remove();
+        // t.FindNode(2).topic.remove();
+        
+        System.out.println(" === ");
+        TopicIF topic = t.FindNode(1).topic;
+        System.out.println(topic.getObjectId());
+        System.out.println(topic.getTopicNames());
+
+        System.out.println(" === ");
+        topic = t.FindNode(2).topic;
+        System.out.println(topic.getObjectId());
+        System.out.println(topic.getTopicNames());
+
+        System.out.println(" === ");
+        topic = t.FindNode(3).topic;
+        System.out.println(topic.getObjectId());
+        System.out.println(topic.getTopicNames());
+
+        // search
+        String keyWord = "BigBro";
+        String ss = "import \"http://psi.ontopia.net/tolog/string/\" as str select $Topic, $TopicName, $RoleType1, $Association, $AssociationType, $RoleTopic2, $RoleType2 from topic-name($Topic, $name), value($name, $TopicName), str:contains($TopicName, \"" + keyWord + "\"), role-player($role1, $Topic), association-role($Association, $role1), association-role($Association, $role2), role-player($role2, $RoleTopic2), $Topic /= $RoleTopic2, type($role1, $RoleType1), type($role2, $RoleType2), type($Association, $AssociationType) order by $Topic?";
+        System.out.println("topic in tm: " + aTopicmap.getTopics().size());
+
+        QueryWrapper wrapper = new QueryWrapper(aTopicmap);
+
+        List list = wrapper.queryForMaps(ss);
+
+        for (int q = 0; q < list.size(); q++) {
+            System.out.println(list.get(q));
+        }
+
         // t.FindNode(32, nodeBigBro);
         // System.out.println("\nmain " + t.FindNode(21, nodeBigBro).name);
 
-//        int a = 32;
-//        System.out.println("finding : " + a + "\n");
-//        t.ha(a, nodeBigBro);
-//        System.out.println(t.ha(a, nodeBigBro).index);
-
-//        t.ha(1, nodeBigBro);
-//        System.out.println("===");
-//        t.ha(2, nodeBigBro);
-//        System.out.println("===");
-//        t.ha(3, nodeBigBro);
-//        System.out.println("===");
-//        t.ha(31, nodeBigBro);
-//        System.out.println("===");
-//        t.ha(311, nodeBigBro);
-//        System.out.println("===");
-//        t.ha(32, nodeBigBro);
-//        System.out.println("===");
-//        t.ha(321, nodeBigBro);
-//        System.out.println("===");
-//        t.ha(4, nodeBigBro);
-//        System.out.println("===");
-        
         // System.out.println("$$$$1 " + aTopicmap.getTopics().size());
         //
         // System.out.println("$$$$2 " + aTopicmap.getTopics().size());
