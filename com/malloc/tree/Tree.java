@@ -9,6 +9,10 @@ import java.util.TreeSet;
 
 
 
+
+
+
+import com.malloc.test.node;
 import com.malloc.tree.Node.NodeType;
 
 import net.ontopia.topicmaps.core.AssociationIF;
@@ -183,12 +187,53 @@ public class Tree {
         return newTreeSize == treeSize + 1 ? true : false;
 
     }
+    
+    // TODO delete 重做，待验证
+    private ArrayList<Node> deleteList = new ArrayList<Node>();
 
+    private void findChildTreeNode(Node startNode ){
+//        private void findChildTreeNode(int findIndex, Node startNode ){
+
+//        deleteList.add(startNode);
+        if (startNode.getChildList() != null && startNode.getChildList().size() != 0) {
+            for (Node n : startNode.getChildList()) {
+            	System.out.println("n =" + n.getName());
+                deleteList.add(n);
+//                if(!n.getChildList().isEmpty()){
+                	// TODO ERROR!!
+                	findChildTreeNode(n);	
+//                }
+            }
+        }
+    }
+    
     // parameter 当前节点（即子节点）的(index, name)
     // return 返回树的大小是否为与被删除节点个数相等
-    // 深度遍历以当前节点为根的子树，依次删除
+    // 找到待删除子树的根节点，深度优先遍历该子树，存储到arraylist，再有后向前依次删除
     public boolean DeleteNode(int delIndex, String delName) throws IOException {
 
+    	Node delNode = FindNode(delIndex);
+    	
+    	findChildTreeNode(delNode);
+    	
+    	ArrayList<Node> dl = deleteList;// = findChildTree(num, delNode);
+    	dl.add(delNode);
+    	System.out.println("deleteList size = " + dl.size());
+    	for(int k = dl.size() - 1; k >= 0; k--){
+
+    		System.out.println("==== " + dl.get(k).getName());
+    		// 子节点的父节点置空，子节点topic删除，父节点的childlist删除子节点,树大小减一
+    		dl.get(k).getTopic().remove();
+    		dl.get(k).setParentNode(null);
+    		dl.remove(k);
+    		sizeDecrease();
+    	}
+
+    	new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
+    	
+    	return delNode.getChildList().isEmpty();
+    }
+/*	
         int treeSize = getSize();
         int deteleSize = 0;
 
@@ -233,8 +278,8 @@ public class Tree {
         return newTreeSize == treeSize - deteleSize ? true : false;
 
     }
-
-    // 
+*/
+    // TODO 节点没找到时的处理
     public Node FindNode(int targetNodeInde) throws IOException {
         return FindNode(targetNodeInde, nodeKami);
     }
@@ -247,13 +292,13 @@ public class Tree {
         Node targetNode = null;
 
         if (startNode.getIndex() == findIndex) {
-            System.out.println("find " + startNode.getIndex() + " ," + startNode.getName());
+//            System.out.println("find " + startNode.getIndex() + " ," + startNode.getName());
             targetNode = startNode;
         } else if (!startNode.getChildList().isEmpty()) {
 
             for (int j = 0; j < startNode.getChildList().size() && targetNode == null; ++j) {
-                System.out.println("esle " + startNode.getChildList().get(j).getIndex() + " ,"
-                        + startNode.getChildList().get(j).getName());
+//                System.out.println("esle " + startNode.getChildList().get(j).getIndex() + " ,"
+//                        + startNode.getChildList().get(j).getName());
                 targetNode = FindNode(findIndex, startNode.getChildList().get(j));
             }
         }
@@ -333,6 +378,11 @@ public class Tree {
         t.AddNode(32, "$32", 321, "$321", NodeType.Scene);
         t.AddNode(32, "$32", 322, "$322", NodeType.Scene);
 
+        t.DeleteNode(3, "$3");
+        t.DeleteNode(1, "@1");
+//        t.DeleteNode(2, "#2");
+//        t.DeleteNode(31, "$31");
+        
         System.out.println(t.getSize());
         System.out.println(aTopicmap.getTopics().size());
         

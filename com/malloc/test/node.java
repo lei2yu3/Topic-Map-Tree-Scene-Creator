@@ -28,6 +28,14 @@ public class node {
 
         this.childList = new ArrayList<node>();
     }
+    
+    public node getParentNode() {
+        return this.parentNode;
+    }
+
+    public void setParentNode(node n) {
+        this.parentNode = n;
+    }
 
     public static void main(String[] args) throws IOException {
         /*
