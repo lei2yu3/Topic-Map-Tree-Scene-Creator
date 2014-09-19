@@ -9,6 +9,7 @@ import net.ontopia.topicmaps.core.AssociationIF;
 import net.ontopia.topicmaps.core.TopicIF;
 import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 import net.ontopia.topicmaps.core.TopicMapIF;
+import net.ontopia.topicmaps.core.TopicMapStoreIF;
 import net.ontopia.topicmaps.core.TopicNameIF;
 import net.ontopia.topicmaps.impl.basic.InMemoryTopicMapStore;
 import net.ontopia.topicmaps.query.utils.QueryWrapper;
@@ -60,14 +61,14 @@ public class tree {
         aBuilder.makeTopicName(topicBigBro, "BigBro");
         nodeBigBro = new node(-1, "BigBro", topicBigBro, null, null);
         sizeIncrease();
-/*
-        topicRS = aBuilder.makeTopic();
-        TopicNameIF tnRS = aBuilder.makeTopicName(topicRS, "Root-Scene");
-        topicScene = aBuilder.makeTopic();
-        TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
-        topicRoot = aBuilder.makeTopic();
-        TopicNameIF tnRoot = aBuilder.makeTopicName(topicRoot, "Root");
-*/
+        /*
+                topicRS = aBuilder.makeTopic();
+                TopicNameIF tnRS = aBuilder.makeTopicName(topicRS, "Root-Scene");
+                topicScene = aBuilder.makeTopic();
+                TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
+                topicRoot = aBuilder.makeTopic();
+                TopicNameIF tnRoot = aBuilder.makeTopicName(topicRoot, "Root");
+        */
 
         TopicIF topic1 = aBuilder.makeTopic();
         aBuilder.makeTopicName(topic1, "#1");
@@ -138,12 +139,12 @@ public class tree {
         node4.setParentNode(nodeBigBro);
         nodeBigBro.childList.add(node4);
         sizeIncrease();
-        
+
         new XTMTopicMapWriter(XTM).write(aTopicmap);
 
     }
 
-  //==================================================================================
+    // ==================================================================================
     public boolean addNode(int pIndex, String pName, int addIndex,
             String addName) throws IOException {
 
@@ -169,7 +170,7 @@ public class tree {
 
     }
 
-  //==================================================================================
+    // ==================================================================================
     public node FindNode(int num) throws IOException {
         return FindNode(num, nodeBigBro);
     }
@@ -183,136 +184,135 @@ public class tree {
         } else if (!r.childList.isEmpty()) {
 
             for (int j = 0; j < r.childList.size() && newNode == null; ++j) {
-//                System.out.println("esle " + r.childList.get(j).index + " ,"
-//                        + r.childList.get(j).name);
+                // System.out.println("esle " + r.childList.get(j).index + " ,"
+                // + r.childList.get(j).name);
                 newNode = FindNode(num, r.childList.get(j));
             }
         }
         return newNode;
     }
 
-//==================================================================================
-    private ArrayList<node> delList = new ArrayList<node>();    
-    
-    public ArrayList<node> getDelList(){
-    	return this.delList;
+    // ==================================================================================
+    private ArrayList<node> delList = new ArrayList<node>();
+
+    public ArrayList<node> getDelList() {
+        return this.delList;
     }
-    
-    
- // TODO delete
+
+    // TODO delete
     public boolean deleteNode(int num) throws IOException {
-    	
-    	node delNode = FindNode(num);
-    	
-    	findChildTree(num, delNode);
-    	
-    	ArrayList<node> dl = getDelList();// = findChildTree(num, delNode);
-dl.add(delNode);
-System.out.println("deleteList size = " + dl.size());
-    	for(int k = dl.size() - 1; k >= 0; k--){
-    		System.out.println("==== " + dl.get(k).name);
-    		// 子节点的父节点置空，子节点topic删除，父节点的childlist删除子节点,树大小减一
-    		dl.get(k).topic.remove();
-    		dl.get(k).setParentNode(null);
-    		dl.remove(k);
-    		sizeDecrease();
-    	}
 
-    	new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
-    	
-    	return delNode.childList.isEmpty();
+        node delNode = FindNode(num);
+
+        findChildTree(num, delNode);
+
+        ArrayList<node> dl = getDelList();// = findChildTree(num, delNode);
+        dl.add(delNode);
+        System.out.println("deleteList size = " + dl.size());
+        for (int k = dl.size() - 1; k >= 0; k--) {
+            System.out.println("==== " + dl.get(k).name);
+            // 子节点的父节点置空，子节点topic删除，父节点的childlist删除子节点,树大小减一
+            dl.get(k).topic.remove();
+            dl.get(k).setParentNode(null);
+            dl.remove(k);
+            sizeDecrease();
+        }
+
+        new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
+
+        return delNode.childList.isEmpty();
     }
 
-    
     public void findChildTree(int num, node r) throws IOException {
-//        public ArrayList<node> findChildTree(int num, node r) throws IOException {
+        // public ArrayList<node> findChildTree(int num, node r) throws
+        // IOException {
 
-//        delList.add(r);
+        // delList.add(r);
         if (r.childList != null && r.childList.size() != 0) {
             for (node n : r.childList) {
                 System.out.println("==n.name = " + n.name);
 
-            	delList.add(n);
-            	
-//                if(n.childList.isEmpty()){
-//                	System.out.println("==" + n.name + " childlist is null");
-//                	System.out.println("==pNode is " + n.getParentNode().name);
-//                	System.out.print("\n");
-//                	
-//                } else{
-//                	System.out.println("==" + n.name + " childlist is not null");
-//                	System.out.println("==pNode is " + n.getParentNode().name);
-//                	System.out.print("\n");
-//                }
-            	findChildTree(num, n);
+                delList.add(n);
+
+                // if(n.childList.isEmpty()){
+                // System.out.println("==" + n.name + " childlist is null");
+                // System.out.println("==pNode is " + n.getParentNode().name);
+                // System.out.print("\n");
+                //
+                // } else{
+                // System.out.println("==" + n.name + " childlist is not null");
+                // System.out.println("==pNode is " + n.getParentNode().name);
+                // System.out.print("\n");
+                // }
+                findChildTree(num, n);
             }
         }
-        
+
     }
 
-  //==================================================================================
+    // ==================================================================================
 
     public static void main(String[] args) throws IOException {
-        tree t = new tree();
-        
+        // tree t = new tree();
+
         // test for delete
-//        t.findChildTree(1, nodeBigBro);
-//        for(int h = delList.size()-1; h >= 0; h--){
-//        	
-//            	System.out.println("n = " + delList.get(h).name);
-//            	delList.get(h).topic.remove();
-//            	delList.get(h).setParentNode(null);
-//            	delList.remove(h);
-//            	t.sizeDecrease();
-//        		
-//        	
-//        }
-//
-        t.deleteNode(1);
-//        t.deleteNode(4);
-        t.deleteNode(3);
-        
-        System.out.print(size);
-        
-/*      // test for add  
-        System.out.println(t.addNode(-1, "BigBro", 1, "node1"));
-        System.out.println(t.addNode(-1, "BigBro", 2, "node2"));
-        System.out.println(t.addNode(-1, "BigBro", 3, "node3"));
-        System.out.println("topic in tm: " + aTopicmap.getTopics().size());
-        
-        // t.FindNode(1, nodeBigBro).topic.remove();
-        // t.FindNode(1).topic.remove();
-        // t.FindNode(2).topic.remove();
-        
-        System.out.println(" === ");
-        TopicIF topic = t.FindNode(1).topic;
-        System.out.println(topic.getObjectId());
-        System.out.println(topic.getTopicNames());
+        // t.findChildTree(1, nodeBigBro);
+        // for(int h = delList.size()-1; h >= 0; h--){
+        //
+        // System.out.println("n = " + delList.get(h).name);
+        // delList.get(h).topic.remove();
+        // delList.get(h).setParentNode(null);
+        // delList.remove(h);
+        // t.sizeDecrease();
+        //
+        //
+        // }
+        //
+        // t.deleteNode(1);
+        // t.deleteNode(4);
+        // t.deleteNode(3);
 
-        System.out.println(" === ");
-        topic = t.FindNode(2).topic;
-        System.out.println(topic.getObjectId());
-        System.out.println(topic.getTopicNames());
+        // System.out.print(size);
 
-        System.out.println(" === ");
-        topic = t.FindNode(3).topic;
-        System.out.println(topic.getObjectId());
-        System.out.println(topic.getTopicNames());
+        /*      // test for add  
+                System.out.println(t.addNode(-1, "BigBro", 1, "node1"));
+                System.out.println(t.addNode(-1, "BigBro", 2, "node2"));
+                System.out.println(t.addNode(-1, "BigBro", 3, "node3"));
+                System.out.println("topic in tm: " + aTopicmap.getTopics().size());
+                
+                // t.FindNode(1, nodeBigBro).topic.remove();
+                // t.FindNode(1).topic.remove();
+                // t.FindNode(2).topic.remove();
+                
+                System.out.println(" === ");
+                TopicIF topic = t.FindNode(1).topic;
+                System.out.println(topic.getObjectId());
+                System.out.println(topic.getTopicNames());
 
-        // search
-        String keyWord = "BigBro";
-        String ss = "import \"http://psi.ontopia.net/tolog/string/\" as str select $Topic, $TopicName, $RoleType1, $Association, $AssociationType, $RoleTopic2, $RoleType2 from topic-name($Topic, $name), value($name, $TopicName), str:contains($TopicName, \"" + keyWord + "\"), role-player($role1, $Topic), association-role($Association, $role1), association-role($Association, $role2), role-player($role2, $RoleTopic2), $Topic /= $RoleTopic2, type($role1, $RoleType1), type($role2, $RoleType2), type($Association, $AssociationType) order by $Topic?";
-        System.out.println("topic in tm: " + aTopicmap.getTopics().size());
+                System.out.println(" === ");
+                topic = t.FindNode(2).topic;
+                System.out.println(topic.getObjectId());
+                System.out.println(topic.getTopicNames());
 
-        QueryWrapper wrapper = new QueryWrapper(aTopicmap);
+                System.out.println(" === ");
+                topic = t.FindNode(3).topic;
+                System.out.println(topic.getObjectId());
+                System.out.println(topic.getTopicNames());
 
-        List list = wrapper.queryForMaps(ss);
+                // search
+                String keyWord = "BigBro";
+                String ss = "import \"http://psi.ontopia.net/tolog/string/\" as str select $Topic, $TopicName, $RoleType1, $Association, $AssociationType, $RoleTopic2, $RoleType2 from topic-name($Topic, $name), value($name, $TopicName), str:contains($TopicName, \"" + keyWord + "\"), role-player($role1, $Topic), association-role($Association, $role1), association-role($Association, $role2), role-player($role2, $RoleTopic2), $Topic /= $RoleTopic2, type($role1, $RoleType1), type($role2, $RoleType2), type($Association, $AssociationType) order by $Topic?";
+                System.out.println("topic in tm: " + aTopicmap.getTopics().size());
 
-        for (int q = 0; q < list.size(); q++) {
-            System.out.println(list.get(q));
-        }
-*/
-        
+                QueryWrapper wrapper = new QueryWrapper(aTopicmap);
+
+                List list = wrapper.queryForMaps(ss);
+
+                for (int q = 0; q < list.size(); q++) {
+                    System.out.println(list.get(q));
+                }
+        */
+
         // test for find
         // t.FindNode(32, nodeBigBro);
         // System.out.println("\nmain " + t.FindNode(21, nodeBigBro).name);
@@ -325,8 +325,41 @@ System.out.println("deleteList size = " + dl.size());
         //
         // System.out.println("$$$$4 " + aTopicmap.getTopics().size());
 
-        new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
+        XTMTopicMapReader r = new XTMTopicMapReader(new File("test.xtm"));
+        TopicMapIF tm = r.read();
+        TopicMapBuilderIF b = tm.getBuilder();
+
+
+//        TopicMapStoreIF s = new InMemoryTopicMapStore();
+//        TopicMapIF tm = s.getTopicMap();
+//        TopicMapBuilderIF b = tm.getBuilder();
+
+        TopicIF tr = b.makeTopic();
+        TopicNameIF tnr = b.makeTopicName(tr, "Root");
+        TopicIF tr1 = b.makeTopic();
+        b.makeTopicName(tr1, "a");
+
+        new XTMTopicMapWriter("test.xtm").write(tm);
+
+//        s.commit();s.close();
+        
+        System.out.println("topicmap size = " + tm.getTopics().size());
+
+        System.out.println(tr);
+        System.out.println(tr.getTopicNames());
+
+        System.out.println(tr.getItemIdentifiers());
+        System.out.println(tr.getRoles());
+        System.out.println(tr.getOccurrences());
+        System.out.println(tr.getAssociations());
+        System.out.println(tr.getSubjectLocators());
+        System.out.println(tr.getSubjectIdentifiers());
+        System.out.println(tr.getTypes());
+        System.out.println(tr.getReified());
+
+        // new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
 
         System.out.println("\n tree DONE");
     }
 }
+

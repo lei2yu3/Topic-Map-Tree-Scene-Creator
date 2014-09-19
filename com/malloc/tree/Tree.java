@@ -4,15 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
-
-
-
-
-
-import com.malloc.test.node;
 import com.malloc.tree.Node.NodeType;
 
 import net.ontopia.topicmaps.core.AssociationIF;
@@ -20,10 +12,9 @@ import net.ontopia.topicmaps.core.AssociationRoleIF;
 import net.ontopia.topicmaps.core.TopicIF;
 import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 import net.ontopia.topicmaps.core.TopicMapIF;
-import net.ontopia.topicmaps.core.TopicMapImporterIF;
-import net.ontopia.topicmaps.core.TopicMapStoreIF;
 import net.ontopia.topicmaps.core.TopicNameIF;
 import net.ontopia.topicmaps.impl.basic.InMemoryTopicMapStore;
+import net.ontopia.topicmaps.query.utils.QueryWrapper;
 import net.ontopia.topicmaps.xml.XTMTopicMapReader;
 import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
 
@@ -57,7 +48,7 @@ public class Tree {
     TopicMapBuilderIF aBuilder = null;
 
     // basic topic
-    TopicIF topicRoot = null;
+    static TopicIF topicRoot = null;
     TopicIF topicParentScene = null;
     TopicIF topicChildScene = null;
     TopicIF topicScene = null;
@@ -127,6 +118,9 @@ public class Tree {
             // 不是根节点，则需根据index查找结点
             Node pNode = FindNode(pIndex);
 
+            if (pNode == null)
+                return false;
+
             if (nt == NodeType.Scene) {
 
                 // meke association ss
@@ -187,104 +181,69 @@ public class Tree {
         return newTreeSize == treeSize + 1 ? true : false;
 
     }
-    
-    // TODO delete 重做，待验证
+
+    // TODO delete
     private ArrayList<Node> deleteList = new ArrayList<Node>();
 
-    private void findChildTreeNode(Node startNode ){
-//        private void findChildTreeNode(int findIndex, Node startNode ){
+    // 遍历子节点，不包含根节点
+    private void findChildTreeNode(Node startNode) {
 
-//        deleteList.add(startNode);
-        if (startNode.getChildList() != null && startNode.getChildList().size() != 0) {
+        if (startNode.getChildList() != null
+                && startNode.getChildList().size() != 0) {
             for (Node n : startNode.getChildList()) {
-            	System.out.println("n =" + n.getName());
                 deleteList.add(n);
-//                if(!n.getChildList().isEmpty()){
-                	// TODO ERROR!!
-                	findChildTreeNode(n);	
-//                }
+                findChildTreeNode(n);
             }
         }
     }
-    
+
     // parameter 当前节点（即子节点）的(index, name)
     // return 返回树的大小是否为与被删除节点个数相等
     // 找到待删除子树的根节点，深度优先遍历该子树，存储到arraylist，再有后向前依次删除
     public boolean DeleteNode(int delIndex, String delName) throws IOException {
 
-    	Node delNode = FindNode(delIndex);
-    	
-    	findChildTreeNode(delNode);
-    	
-    	ArrayList<Node> dl = deleteList;// = findChildTree(num, delNode);
-    	dl.add(delNode);
-    	System.out.println("deleteList size = " + dl.size());
-    	for(int k = dl.size() - 1; k >= 0; k--){
-
-    		System.out.println("==== " + dl.get(k).getName());
-    		// 子节点的父节点置空，子节点topic删除，父节点的childlist删除子节点,树大小减一
-    		dl.get(k).getTopic().remove();
-    		dl.get(k).setParentNode(null);
-    		dl.remove(k);
-    		sizeDecrease();
-    	}
-
-    	new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
-    	
-    	return delNode.getChildList().isEmpty();
-    }
-/*	
         int treeSize = getSize();
-        int deteleSize = 0;
 
         Node delNode = FindNode(delIndex);
-        Node delParentNode = delNode.getParentNode();
-                
-        // TODO 深度优先遍历以delNode为根的子树，（保存为ArrayList）依次删除
-        if (delParentNode.getChildList() != null
-                || delParentNode.getChildList().size() != 0) {
 
-            for (int i = 0; i < delParentNode.getChildList().size(); i++) {
-                // if (delParentNode.getChildList().get(i).getChildList() ==
-                // null
-                // || delParentNode.getChildList().get(i).getChildList().size()
-                // == 0) {
-                if (delParentNode.getChildList().get(i).getChildList()
-                        .isEmpty()) {
+        if (delNode == null)
+            return false;
 
-                    // remove topic in tm
-                    delParentNode.getChildList().get(i).getTopic().remove();
+        Node pDelNode = delNode.getParentNode();
 
-                    // remove node in child list
-                    delParentNode.getChildList().remove(i);
-//                    delParentNode.getChildList().get(i).getParentNode() = null;
-                    sizeDecrease();
-                    deteleSize++;
+        System.out.println("Delete : " + delNode.getName());
+        System.out.println("Parent : " + pDelNode.getName());
 
-                } else {
-                    // TODO 递归
-                    // 删除孩子节点列表
-                    sizeDecrease();
-                    delParentNode.getChildList().clear();
-                    deteleSize += delParentNode.getChildList().size();
-                }
-            }
+        findChildTreeNode(delNode);
+
+        ArrayList<Node> dl = deleteList;// = findChildTree(num, delNode);
+        dl.add(delNode);
+
+        int deteleSize = dl.size();
+        // System.out.println("deleteList size = " + dl.size());
+
+        for (int k = dl.size() - 1; k >= 0; k--) {
+
+            System.out.println("Child " + k + " " + dl.get(k).getName());
+            // 子节点的父节点置空，子节点topic删除，父节点的childlist删除子节点,树大小减一
+            dl.get(k).getTopic().remove();
+            dl.get(k).setParentNode(null);
+            dl.remove(k);
+            sizeDecrease();
         }
 
-        // modify tm, save to xtm
-        new XTMTopicMapWriter(XTM).write(aTopicmap);
+        new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
 
         int newTreeSize = getSize();
         return newTreeSize == treeSize - deteleSize ? true : false;
-
     }
-*/
+
     // TODO 节点没找到时的处理
     public Node FindNode(int targetNodeInde) throws IOException {
         return FindNode(targetNodeInde, nodeKami);
     }
-    
-    // parameter 查找结点index，开始查找的node（当前根节点） 
+
+    // parameter 查找结点index，开始查找的node（当前根节点）
     // return 查找到则返回返回node，否则为null
     // 深度遍历查找指定index的node，返回该节点
     public Node FindNode(int findIndex, Node startNode) throws IOException {
@@ -292,14 +251,18 @@ public class Tree {
         Node targetNode = null;
 
         if (startNode.getIndex() == findIndex) {
-//            System.out.println("find " + startNode.getIndex() + " ," + startNode.getName());
+            // System.out.println("find " + startNode.getIndex() + " ," +
+            // startNode.getName());
             targetNode = startNode;
         } else if (!startNode.getChildList().isEmpty()) {
 
-            for (int j = 0; j < startNode.getChildList().size() && targetNode == null; ++j) {
-//                System.out.println("esle " + startNode.getChildList().get(j).getIndex() + " ,"
-//                        + startNode.getChildList().get(j).getName());
-                targetNode = FindNode(findIndex, startNode.getChildList().get(j));
+            for (int j = 0; j < startNode.getChildList().size()
+                    && targetNode == null; ++j) {
+                // System.out.println("esle " +
+                // startNode.getChildList().get(j).getIndex() + " ,"
+                // + startNode.getChildList().get(j).getName());
+                targetNode = FindNode(findIndex, startNode.getChildList()
+                        .get(j));
             }
         }
 
@@ -310,67 +273,118 @@ public class Tree {
     public void init() throws IOException {
 
         // ParentScene-ChildScene, Root-Scene, Scene-Data, Data-Value
-    	
-    	// root node in r-s
-    	topicRoot = aBuilder.makeTopic();
-        TopicNameIF tnRoot = aBuilder.makeTopicName(topicRoot, "Root");
-        
+
+        // root node in r-s
+        topicRoot = aBuilder.makeTopic();
+        // TopicNameIF tnRoot =
+        aBuilder.makeTopicName(topicRoot, "Root");
+
         // parent scene node in s-s
         topicParentScene = aBuilder.makeTopic();
-        TopicNameIF tnParentScene = aBuilder.makeTopicName(topicParentScene,
-                "ParentScene");
+        // TopicNameIF tnParentScene =
+        aBuilder.makeTopicName(topicParentScene, "ParentScene");
 
         // child scene node in s-s
         topicChildScene = aBuilder.makeTopic();
-        TopicNameIF tnChildScene = aBuilder.makeTopicName(topicChildScene,
-                "ChildScene");
+        // TopicNameIF tnChildScene =
+        aBuilder.makeTopicName(topicChildScene, "ChildScene");
 
         // scene node in s-d or r-s
         topicScene = aBuilder.makeTopic();
-        TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
+        // TopicNameIF tnScene =
+        aBuilder.makeTopicName(topicScene, "Scene");
 
         // data node in s-d or d-v
-//        topicData = aBuilder.makeTopic();
-//        TopicNameIF tnData = aBuilder.makeTopicName(topicData, "Data");
-//
-//        // value node in d-v
-//        topicValue = aBuilder.makeTopic();
-//        TopicNameIF tnValue = aBuilder.makeTopicName(topicValue, "Value");
+        // topicData = aBuilder.makeTopic();
+        // // TopicNameIF tnData = 
+        // aBuilder.makeTopicName(topicData, "Data");
+
+        // value node in d-v
+        // topicValue = aBuilder.makeTopic();
+        // // TopicNameIF tnValue =
+        // aBuilder.makeTopicName(topicValue, "Value");
 
         // association type node r-s
         topicRS = aBuilder.makeTopic();
-        TopicNameIF tnRS = aBuilder.makeTopicName(topicRS, "Root-Scene");
+        // TopicNameIF tnRS =
+        aBuilder.makeTopicName(topicRS, "Root-Scene");
 
         // association type node s-s
         topicSS = aBuilder.makeTopic();
-        TopicNameIF tnSS = aBuilder.makeTopicName(topicSS, "Scene-Scene");
+        // TopicNameIF tnSS =
+        aBuilder.makeTopicName(topicSS, "Scene-Scene");
 
         // association type node s-d
-//        topicSD = aBuilder.makeTopic();
-//        TopicNameIF tnSD = aBuilder.makeTopicName(topicSD, "Scene-Data");
-//
-//        // association type node d-v
-//        topicDV = aBuilder.makeTopic();
-//        TopicNameIF tnDV = aBuilder.makeTopicName(topicDV, "Data-Value");
+        // topicSD = aBuilder.makeTopic();
+        // // TopicNameIF tnSD =
+        // aBuilder.makeTopicName(topicSD, "Scene-Data");
+        //
+        // association type node d-v
+        // topicDV = aBuilder.makeTopic();
+        // // TopicNameIF tnDV =
+        // aBuilder.makeTopicName(topicDV, "Data-Value");
 
         new XTMTopicMapWriter(XTM).write(aTopicmap);
 
     }
 
+    public void query() {
+        // TODO 相关联节点的查找
+        // public void query(int nodeIndex, String nodeName, NodeType nt) throws
+        // IOException {
+        /*
+        if (nodeIndex == -1) {
+         // 输出R-S关联的Scene
+        }
+        Node queryNode = FindNode(nodeIndex);
+        
+        if(queryNode.getNodeType() == NodeType.Scene){
+            // 输出S-D关联的Data，输出PS-CS关联的ChildScene(roletype != ParentScene)
+        }else if(queryNode.getNodeType() == NodeType.Data){
+            // 输出D-V关联的Value
+        }else if(queryNode.getNodeType() == NodeType.Value){
+            // 直接输出
+        }
+        */
+
+        String keyWord = "$3";
+        String ss =
+        // ("item-identifier($obj, \"file:/X:/TopicMap/ontopia-5.3.0/topicmaps/hoho.xtm#id4\")?");
+        // "select $Topic, $RoleType1, $AssociationType, $RoleTopic2, $RoleType2 from topic-name($Topic, $name), value($name, \""
+        "select $RoleTopic2, $RoleType2 from topic-name($Topic, $name), value($name, \""
+                + keyWord
+                + "\"), role-player($role1, $Topic), association-role($Association, $role1), association-role($Association, $role2), role-player($role2, $RoleTopic2), $Topic /= $RoleTopic2, type($role1, $RoleType1), type($role2, $RoleType2), type($Association, $AssociationType) ?";
+        System.out.println("topic in tm: " + aTopicmap.getTopics().size());
+
+        QueryWrapper wrapper = new QueryWrapper(aTopicmap);
+
+        // List list = wrapper.queryForMaps(ss);
+        @SuppressWarnings("unchecked")
+        List<TopicIF> list = wrapper.queryForList(ss);
+
+        for (int q = 0; q < list.size(); q++) {
+            // System.out.println(list.get(q));
+            System.out.println(list.get(q).getTopicNames());
+        }
+    }
+
     // for test
     public static void main(String[] args) throws IOException {
 
+        System.out.println("========== Initial ==========\n");
         Tree t = new Tree();
+
+        // initialize topic map with basic topics and associations
         t.init();
-        
-        System.out.println(" main\n");
-        System.out.println(t.FindNode(-1).getName().toString());
+
+        System.out.println("\n========== Add ==========\n");
+        // System.out.println(t.FindNode(-1).getName().toString());
 
         t.AddNode(-1, "Kami", 1, "@1", NodeType.Scene);
         t.AddNode(-1, "Kami", 2, "#2", NodeType.Scene);
         t.AddNode(-1, "Kami", 3, "$3", NodeType.Scene);
         t.AddNode(2, "#2", 21, "#21", NodeType.Scene);
-        t.AddNode(2, "#2", 22, "#22", NodeType.Scene);
+        System.out.println(t.AddNode(2, "#2", 22, "#22", NodeType.Scene));
         t.AddNode(3, "$3", 31, "$31", NodeType.Scene);
         t.AddNode(3, "$3", 32, "$32", NodeType.Scene);
         t.AddNode(31, "$31", 311, "$311", NodeType.Scene);
@@ -378,23 +392,57 @@ public class Tree {
         t.AddNode(32, "$32", 321, "$321", NodeType.Scene);
         t.AddNode(32, "$32", 322, "$322", NodeType.Scene);
 
-        t.DeleteNode(3, "$3");
-        t.DeleteNode(1, "@1");
-//        t.DeleteNode(2, "#2");
-//        t.DeleteNode(31, "$31");
-        
-        System.out.println(t.getSize());
-        System.out.println(aTopicmap.getTopics().size());
-        
-        
-        // initialize topic map with basic topics and associations
-        // nt.init();
+        System.out.println("tree size = " + t.getSize());
+        System.out.println("topicmap size = " + aTopicmap.getTopics().size());
 
-        // add and delete
-        // nt.AddNode(0, null, 0, null, NodeType.Scene);
-        // nt.DeleteNode(0, null);
+        System.out.println("\n========== Delete ==========\n");
+        // t.DeleteNode(3, "$3");
+        // t.DeleteNode(1, "@1");
+        // System.out.println(t.DeleteNode(2, "#2"));
+        // System.out.println(t.DeleteNode(3, "$3"));
+        // t.DeleteNode(31, "$31");
 
-        System.out.println("\n Tree DONE");
+        System.out.println("tree size = " + t.getSize());
+        System.out.println("topicmap size = " + aTopicmap.getTopics().size());
+
+        System.out.println("\n========== Query ==========\n");
+        t.query();
+
+        System.out.println("\n========== DONE==========");
+
+        System.out.println(topicRoot);
+        System.out.println(topicRoot.getTopicNames());
+
+        System.out.println(topicRoot.getItemIdentifiers());
+        System.out.println(topicRoot.getRoles());
+        System.out.println(topicRoot.getOccurrences());
+        System.out.println(topicRoot.getAssociations());
+        System.out.println(topicRoot.getSubjectLocators());
+        System.out.println(topicRoot.getSubjectIdentifiers());
+        System.out.println(topicRoot.getTypes());
+        System.out.println(topicRoot.getReified());
 
     }
 }
+/*
+topic-name($topic,$name),
+value($name, "Root"),
+item-identifier($topic,$locator)? 
+
+
+
+select $Topic, $RoleType1, $Association, $AssociationType, $RoleTopic2, $RoleType2 
+
+from topic-name($Topic, $name), 
+value($name, "$31"), 
+role-player($role1, $Topic), 
+association-role($Association, $role1), 
+association-role($Association, $role2),
+role-player($role2, $RoleTopic2), 
+$Topic /= $RoleTopic2, 
+type($role1, $RoleType1),
+type($role2, $RoleType2), 
+type($Association, $AssociationType)
+
+order by $Topic?";
+*/

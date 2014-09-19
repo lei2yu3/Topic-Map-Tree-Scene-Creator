@@ -28,7 +28,7 @@ public class node {
 
         this.childList = new ArrayList<node>();
     }
-    
+
     public node getParentNode() {
         return this.parentNode;
     }
