@@ -5,14 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.ontopia.infoset.core.LocatorIF;
 import net.ontopia.infoset.impl.basic.URILocator;
 import net.ontopia.topicmaps.core.AssociationIF;
 import net.ontopia.topicmaps.core.TopicIF;
 import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 import net.ontopia.topicmaps.core.TopicMapIF;
-import net.ontopia.topicmaps.core.TopicMapStoreIF;
-import net.ontopia.topicmaps.core.TopicNameIF;
 import net.ontopia.topicmaps.impl.basic.InMemoryTopicMapStore;
 import net.ontopia.topicmaps.query.core.InvalidQueryException;
 import net.ontopia.topicmaps.query.core.QueryProcessorIF;
@@ -69,12 +66,12 @@ public class tree {
         sizeIncrease();
         topicBigBro.addSubjectIdentifier(new URILocator("http://topic0"));
         /*
-                topicRS = aBuilder.makeTopic();
-                TopicNameIF tnRS = aBuilder.makeTopicName(topicRS, "Root-Scene");
-                topicScene = aBuilder.makeTopic();
-                TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
-                topicRoot = aBuilder.makeTopic();
-                TopicNameIF tnRoot = aBuilder.makeTopicName(topicRoot, "Root");
+        topicRS = aBuilder.makeTopic();
+        TopicNameIF tnRS = aBuilder.makeTopicName(topicRS, "Root-Scene");
+        topicScene = aBuilder.makeTopic();
+        TopicNameIF tnScene = aBuilder.makeTopicName(topicScene, "Scene");
+        topicRoot = aBuilder.makeTopic();
+        TopicNameIF tnRoot = aBuilder.makeTopicName(topicRoot, "Root");
         */
 
         TopicIF topic1 = aBuilder.makeTopic();
@@ -216,14 +213,28 @@ public class tree {
         return this.delList;
     }
 
-    // TODO delete
+    public void findChildTree(int num, node r) throws IOException {
+
+        // delList.add(r);
+        if (r.childList != null && r.childList.size() != 0) {
+            for (node n : r.childList) {
+                System.out.println("==n.name = " + n.name);
+
+                delList.add(n);
+
+                findChildTree(num, n);
+            }
+        }
+    }
+
+    // delete
     public boolean deleteNode(int num) throws IOException {
 
         node delNode = FindNode(num);
 
         findChildTree(num, delNode);
 
-        ArrayList<node> dl = getDelList();// = findChildTree(num, delNode);
+        ArrayList<node> dl = getDelList();
         dl.add(delNode);
         System.out.println("deleteList size = " + dl.size());
         for (int k = dl.size() - 1; k >= 0; k--) {
@@ -240,145 +251,110 @@ public class tree {
         return delNode.childList.isEmpty();
     }
 
-    public void findChildTree(int num, node r) throws IOException {
-
-        // delList.add(r);
-        if (r.childList != null && r.childList.size() != 0) {
-            for (node n : r.childList) {
-                System.out.println("==n.name = " + n.name);
-
-                delList.add(n);
-
-                findChildTree(num, n);
-            }
-        }
-
-    }
-
     // ==================================================================================
 
     public static void main(String[] args) throws IOException {
 
-        
-         tree t = new tree();
+        tree t = new tree();
 
-        // test for delete
-        // t.findChildTree(1, nodeBigBro);
-        // for(int h = delList.size()-1; h >= 0; h--){
-        //
-        // System.out.println("n = " + delList.get(h).name);
-        // delList.get(h).topic.remove();
-        // delList.get(h).setParentNode(null);
-        // delList.remove(h);
-        // t.sizeDecrease();
-        //
-        //
-        // }
-        //
         // t.deleteNode(1);
         // t.deleteNode(4);
         // t.deleteNode(3);
 
-        // System.out.print(size);
+        // System.out.println(t.addNode(-1, "BigBro", 1, "node1"));
+        // System.out.println(t.addNode(-1, "BigBro", 2, "node2"));
+        // System.out.println(t.addNode(-1, "BigBro", 3, "node3"));
+        //
+        // t.FindNode(1, nodeBigBro).topic.remove();
+        // t.FindNode(1).topic.remove();
+        // t.FindNode(2).topic.remove();
+        //
+        // System.out.println(" === ");
+        // TopicIF topic = t.FindNode(1).topic;
+        // System.out.println(topic.getObjectId());
+        // System.out.println(topic.getTopicNames());
+        //
+        // System.out.println(" === ");
+        // topic = t.FindNode(2).topic;
+        // System.out.println(topic.getObjectId());
+        // System.out.println(topic.getTopicNames());
+        //
+        // System.out.println(" === ");
+        // topic = t.FindNode(3).topic;
+        // System.out.println(topic.getObjectId());
+        // System.out.println(topic.getTopicNames());
+        //
+        // // search
+        // String keyWord = "BigBro";
+        // String ss =
+        // "import \"http://psi.ontopia.net/tolog/string/\" as str select $Topic, $TopicName, $RoleType1, $Association, $AssociationType, $RoleTopic2, $RoleType2 from topic-name($Topic, $name), value($name, $TopicName), str:contains($TopicName, \""
+        // + keyWord +
+        // "\"), role-player($role1, $Topic), association-role($Association, $role1), association-role($Association, $role2), role-player($role2, $RoleTopic2), $Topic /= $RoleTopic2, type($role1, $RoleType1), type($role2, $RoleType2), type($Association, $AssociationType) order by $Topic?";
+        // System.out.println("topic in tm: " + aTopicmap.getTopics().size());
+        //
+        // QueryWrapper wrapper = new QueryWrapper(aTopicmap);
+        //
+        // List list = wrapper.queryForMaps(ss);
+        //
+        // for (int q = 0; q < list.size(); q++) {
+        // System.out.println(list.get(q));
+        // }
 
-        //  // test for add  
-        //System.out.println(t.addNode(-1, "BigBro", 1, "node1"));
-        //System.out.println(t.addNode(-1, "BigBro", 2, "node2"));
-        //System.out.println(t.addNode(-1, "BigBro", 3, "node3"));
-        //System.out.println("topic in tm: " + aTopicmap.getTopics().size());
-        //
-        //// t.FindNode(1, nodeBigBro).topic.remove();
-        //// t.FindNode(1).topic.remove();
-        //// t.FindNode(2).topic.remove();
-        //
-        //System.out.println(" === ");
-        //TopicIF topic = t.FindNode(1).topic;
-        //System.out.println(topic.getObjectId());
-        //System.out.println(topic.getTopicNames());
-        //
-        //System.out.println(" === ");
-        //topic = t.FindNode(2).topic;
-        //System.out.println(topic.getObjectId());
-        //System.out.println(topic.getTopicNames());
-        //
-        //System.out.println(" === ");
-        //topic = t.FindNode(3).topic;
-        //System.out.println(topic.getObjectId());
-        //System.out.println(topic.getTopicNames());
-        //
-        //// search
-        //String keyWord = "BigBro";
-        //String ss = "import \"http://psi.ontopia.net/tolog/string/\" as str select $Topic, $TopicName, $RoleType1, $Association, $AssociationType, $RoleTopic2, $RoleType2 from topic-name($Topic, $name), value($name, $TopicName), str:contains($TopicName, \"" + keyWord + "\"), role-player($role1, $Topic), association-role($Association, $role1), association-role($Association, $role2), role-player($role2, $RoleTopic2), $Topic /= $RoleTopic2, type($role1, $RoleType1), type($role2, $RoleType2), type($Association, $AssociationType) order by $Topic?";
-        //System.out.println("topic in tm: " + aTopicmap.getTopics().size());
-        //
-        //QueryWrapper wrapper = new QueryWrapper(aTopicmap);
-        //
-        //List list = wrapper.queryForMaps(ss);
-        //
-        //for (int q = 0; q < list.size(); q++) {
-        //    System.out.println(list.get(q));
-        //}
+        // new XTMTopicMapWriter("test.xtm").write(new InMemoryTopicMapStore()
+        // .getTopicMap());
 
-
-        // test for find
-        // t.FindNode(32, nodeBigBro);
-        // System.out.println("\nmain " + t.FindNode(21, nodeBigBro).name);
-
-
-//        new XTMTopicMapWriter("test.xtm").write(new InMemoryTopicMapStore()
-//                .getTopicMap());
-        
         XTMTopicMapReader r = new XTMTopicMapReader(new File("hoho.xtm"));
         TopicMapIF tm = r.read();
         TopicMapBuilderIF b = tm.getBuilder();
 
-//        TopicMapStoreIF s = new InMemoryTopicMapStore();
-//        TopicMapIF tm = s.getTopicMap();
-//        TopicMapBuilderIF b = tm.getBuilder();
+        // TopicMapStoreIF s = new InMemoryTopicMapStore();
+        // TopicMapIF tm = s.getTopicMap();
+        // TopicMapBuilderIF b = tm.getBuilder();
 
-//        TopicIF tr = b.makeTopic();
-//        TopicNameIF tnr = b.makeTopicName(tr, "Root");
-//
-//        URILocator loc = new URILocator("http://123.3");
-//        tr.addSubjectIdentifier(new URILocator("http://Root"));
-//        
-//        TopicIF tr1 = b.makeTopic();
-//        b.makeTopicName(tr1, "aaa");
-//        tr1.addSubjectIdentifier(new URILocator("http://aaa"));
-//
-//        new XTMTopicMapWriter("test.xtm").write(tm);
+        // TopicIF tr = b.makeTopic();
+        // TopicNameIF tnr = b.makeTopicName(tr, "Root");
+        //
+        // URILocator loc = new URILocator("http://123.3");
+        // tr.addSubjectIdentifier(new URILocator("http://Root"));
+        //
+        // TopicIF tr1 = b.makeTopic();
+        // b.makeTopicName(tr1, "aaa");
+        // tr1.addSubjectIdentifier(new URILocator("http://aaa"));
+        //
+        // new XTMTopicMapWriter("test.xtm").write(tm);
 
-//        s.commit();s.close();
+        // s.commit();s.close();
 
-        TopicIF nn = tm.getTopicBySubjectIdentifier(new URILocator("http://topic321/"));
+        TopicIF nn = tm.getTopicBySubjectIdentifier(new URILocator(
+                "http://topic321/"));
         nn.remove();
         System.out.println("topicmap size = " + tm.getTopics().size());
 
-      new XTMTopicMapWriter("hoho.xtm").write(tm);
-//        System.out.println(tr);
-//        System.out.println(tr.getTopicNames());
-//        System.out.println(tr.getObjectId());
-//
-//        System.out.println(tr.getSubjectIdentifiers().toString());
-//        System.out.println(tr.getSubjectLocators());
-//        System.out.println(tr.getItemIdentifiers());
+        new XTMTopicMapWriter("hoho.xtm").write(tm);
+        // System.out.println(tr);
+        // System.out.println(tr.getTopicNames());
+        // System.out.println(tr.getObjectId());
+        //
+        // System.out.println(tr.getSubjectIdentifiers().toString());
+        // System.out.println(tr.getSubjectLocators());
+        // System.out.println(tr.getItemIdentifiers());
         // new XTMTopicMapWriter("hoho.xtm").write(aTopicmap);
 
-//        for(LocatorIF i : a){
-//            System.out.println(i.toString());
-//        }
-        
+        // for(LocatorIF i : a){
+        // System.out.println(i.toString());
+        // }
+
         QueryWrapper wrapper = new QueryWrapper(tm);
-        String ss = 
-//                "select $b from subject-identifier($a,$b)?";
-                   "subject-identifier($topic,\"http://topic321/\")?";
-//        "select $b from subject-locator($a,$b)?";
-//        "select $b from item-identifier($a,$b)";
-        
+        String ss =
+        // "select $b from subject-identifier($a,$b)?";
+        "subject-identifier($topic,\"http://topic321/\")?";
+        // "select $b from subject-locator($a,$b)?";
+        // "select $b from item-identifier($a,$b)";
+
         @SuppressWarnings("unchecked")
-        List<TopicIF> list = 
-//                wrapper.queryForMaps(ss);
-                wrapper.queryForList(ss);
+        List<TopicIF> list =
+        // wrapper.queryForMaps(ss);
+        wrapper.queryForList(ss);
 
         for (int q = 0; q < list.size(); q++) {
             System.out.println(list.get(q).getObjectId());
@@ -386,30 +362,29 @@ public class tree {
         }
 
         System.out.println("\n ==tree DONE== \n");
-        
+
         try {
-        QueryProcessorIF proc = QueryUtils.getQueryProcessor(tm);
+            QueryProcessorIF proc = QueryUtils.getQueryProcessor(tm);
 
             QueryResultIF result = proc.execute(ss);
             String[] variables = result.getColumnNames();
-            for (int ix = 0; ix < variables.length; ix++){
+            for (int ix = 0; ix < variables.length; ix++) {
                 System.out.println(variables[ix]);
             }
-            
+
             Object[] row = new Object[result.getWidth()];
             while (result.next()) {
                 System.out.println(result.getClass());
-              result.getValues(row);
-              for (int ix = 0; ix < variables.length; ix++) {
+                result.getValues(row);
+                for (int ix = 0; ix < variables.length; ix++) {
                     System.out.println("=1== " + row[ix]);
-              }
+                }
             }
-            result.close();    
-            
+            result.close();
+
         } catch (InvalidQueryException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 }
-

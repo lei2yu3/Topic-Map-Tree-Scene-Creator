@@ -1,18 +1,9 @@
 package com.malloc.tree;
 
-//import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import net.ontopia.topicmaps.core.TopicIF;
-//import net.ontopia.topicmaps.core.TopicMapBuilderIF;
-//import net.ontopia.topicmaps.core.TopicMapIF;
-//import net.ontopia.topicmaps.core.TopicMapImporterIF;
-//import net.ontopia.topicmaps.core.TopicMapStoreIF;
-//import net.ontopia.topicmaps.core.TopicNameIF;
-//import net.ontopia.topicmaps.impl.basic.InMemoryTopicMapStore;
-//import net.ontopia.topicmaps.xml.XTMTopicMapReader;
-//import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
 
 public class Node {
 
@@ -45,12 +36,10 @@ public class Node {
 
     public Node() throws IOException {
         this(0, null, null, null, null, null);
-        // this(0, null, null, null, null);
     }
 
     public Node(int nIndex, String nName, TopicIF nTopic, NodeType nNodeType,
             Node nParentNode, ArrayList<Node> nChildList) throws IOException {
-        // Node nParentNode) throws IOException {
 
         //
         this.index = nIndex;
@@ -58,8 +47,7 @@ public class Node {
         this.topic = nTopic;
         this.nodeType = nNodeType;
         this.parentNode = nParentNode;
-        // this.childList = nChildList;
-        // TODO 为避免容器自动扩容时影响性能，可以指定创建时的元素大小。
+        // 为避免容器自动扩容时影响性能，可以在创建时指定容器大小。
         this.childList = new ArrayList<Node>();
     }
 
@@ -107,7 +95,6 @@ class Scene extends Node {
 
     Scene(int sIndex, String sName, Node sParentNode) throws IOException {
         super(sIndex, sName, null, NodeType.Value, sParentNode, null);
-        // super(sIndex, sName, null, NodeType.Value, sParentNode);
     }
 }
 
@@ -120,7 +107,6 @@ class Data extends Node {
 
     Data(int dIndex, String dName, Node dParentNode) throws IOException {
         super(dIndex, dName, null, NodeType.Value, dParentNode, null);
-        // super(dIndex, dName, null, NodeType.Value, dParentNode);
     }
 }
 
@@ -133,6 +119,5 @@ class Value extends Node {
 
     Value(int vIndex, String vName, Node vParentNode) throws IOException {
         super(vIndex, vName, null, NodeType.Value, vParentNode, null);
-        // super(vIndex, vName, null, NodeType.Value, vParentNode);
     }
 }

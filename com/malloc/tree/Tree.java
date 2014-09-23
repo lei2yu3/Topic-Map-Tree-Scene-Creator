@@ -105,9 +105,7 @@ public class Tree {
                     null);
 
             AssociationIF aRS = aBuilder.makeAssociation(topicRS);
-            // AssociationRoleIF arRoot =
             aBuilder.makeAssociationRole(aRS, topicRoot, topicKami);
-            // AssociationRoleIF arScene =
             aBuilder.makeAssociationRole(aRS, topicScene, topicAdd);
 
             addNode.setParentNode(nodeKami);
@@ -128,10 +126,8 @@ public class Tree {
                         NodeType.Scene, pNode, null);
 
                 AssociationIF aSS = aBuilder.makeAssociation(topicSS);
-                // AssociationRoleIF arParentScene =
                 aBuilder.makeAssociationRole(aSS, topicParentScene,
                         pNode.getTopic());
-                // AssociationRoleIF arChildScene =
                 aBuilder.makeAssociationRole(aSS, topicChildScene, topicAdd);
 
                 addNode.setParentNode(pNode);
@@ -145,9 +141,7 @@ public class Tree {
                         NodeType.Data, pNode, null);
 
                 AssociationIF aSD = aBuilder.makeAssociation(topicSD);
-                // AssociationRoleIF arScene =
                 aBuilder.makeAssociationRole(aSD, topicScene, pNode.getTopic());
-                // AssociationRoleIF arData =
                 aBuilder.makeAssociationRole(aSD, topicData, topicAdd);
 
                 addNode.setParentNode(pNode);
@@ -161,9 +155,7 @@ public class Tree {
                         NodeType.Value, pNode, null);
 
                 AssociationIF aDV = aBuilder.makeAssociation(topicDV);
-                // AssociationRoleIF arData =
                 aBuilder.makeAssociationRole(aDV, topicData, pNode.getTopic());
-                // AssociationRoleIF arValue =
                 aBuilder.makeAssociationRole(aDV, topicValue, topicAdd);
 
                 addNode.setParentNode(pNode);
@@ -182,7 +174,6 @@ public class Tree {
 
     }
 
-    // TODO delete
     private ArrayList<Node> deleteList = new ArrayList<Node>();
 
     // 遍历子节点，不包含根节点
@@ -216,11 +207,10 @@ public class Tree {
 
         findChildTreeNode(delNode);
 
-        ArrayList<Node> dl = deleteList;// = findChildTree(num, delNode);
+        ArrayList<Node> dl = deleteList;
         dl.add(delNode);
 
         int deteleSize = dl.size();
-        // System.out.println("deleteList size = " + dl.size());
 
         for (int k = dl.size() - 1; k >= 0; k--) {
 
@@ -276,17 +266,14 @@ public class Tree {
 
         // root node in r-s
         topicRoot = aBuilder.makeTopic();
-        // TopicNameIF tnRoot =
         aBuilder.makeTopicName(topicRoot, "Root");
 
         // parent scene node in s-s
         topicParentScene = aBuilder.makeTopic();
-        // TopicNameIF tnParentScene =
         aBuilder.makeTopicName(topicParentScene, "ParentScene");
 
         // child scene node in s-s
         topicChildScene = aBuilder.makeTopic();
-        // TopicNameIF tnChildScene =
         aBuilder.makeTopicName(topicChildScene, "ChildScene");
 
         // scene node in s-d or r-s
@@ -295,34 +282,28 @@ public class Tree {
         aBuilder.makeTopicName(topicScene, "Scene");
 
         // data node in s-d or d-v
-        // topicData = aBuilder.makeTopic();
-        // // TopicNameIF tnData = 
-        // aBuilder.makeTopicName(topicData, "Data");
+        topicData = aBuilder.makeTopic();
+        aBuilder.makeTopicName(topicData, "Data");
 
         // value node in d-v
-        // topicValue = aBuilder.makeTopic();
-        // // TopicNameIF tnValue =
-        // aBuilder.makeTopicName(topicValue, "Value");
+        topicValue = aBuilder.makeTopic();
+        aBuilder.makeTopicName(topicValue, "Value");
 
         // association type node r-s
         topicRS = aBuilder.makeTopic();
-        // TopicNameIF tnRS =
         aBuilder.makeTopicName(topicRS, "Root-Scene");
 
         // association type node s-s
         topicSS = aBuilder.makeTopic();
-        // TopicNameIF tnSS =
         aBuilder.makeTopicName(topicSS, "Scene-Scene");
 
         // association type node s-d
-        // topicSD = aBuilder.makeTopic();
-        // // TopicNameIF tnSD =
-        // aBuilder.makeTopicName(topicSD, "Scene-Data");
+        topicSD = aBuilder.makeTopic();
+        aBuilder.makeTopicName(topicSD, "Scene-Data");
         //
         // association type node d-v
-        // topicDV = aBuilder.makeTopic();
-        // // TopicNameIF tnDV =
-        // aBuilder.makeTopicName(topicDV, "Data-Value");
+        topicDV = aBuilder.makeTopic();
+        aBuilder.makeTopicName(topicDV, "Data-Value");
 
         new XTMTopicMapWriter(XTM).write(aTopicmap);
 
