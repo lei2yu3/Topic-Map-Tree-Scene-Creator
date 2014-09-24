@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Stack;
 
 import net.ontopia.infoset.impl.basic.URILocator;
 import net.ontopia.topicmaps.core.AssociationIF;
@@ -147,32 +148,73 @@ public class Creator {
         TopicIF topicDelete = dTopicmap
                 .getTopicBySubjectIdentifier(new URILocator(delSI));
 
-        ArrayList<TopicIF> delList = new ArrayList<TopicIF>();
-        String query = "";
-        // TODO 删除子树
-        if (tt == TopicType.Scene) {
+        Stack<TopicIF> delStack = new Stack<TopicIF>();
+        delStack.push(topicDelete);
 
-            // TODO 若是scene，删除与该节点有sd关联的主题，删除与该节点有ss关联且扮演childscene角色的主题
-            // 需递归
-            query = "select $d from subject-identifier($d, \"http://topic3\"), scene-scene( $p:parentscene, $c:childscene), root-scene($s:scene, $d:data)?";
-
-        } else if (tt == TopicType.Data) {
-
-            // TODO 若是data，删除与该节点有dv关联的主题
-            query = "select $d from subject-identifier($d, \"http://topic3\"), data-value( $d:data, $v:value)?";
-            
-        } else if (tt == TopicType.Value) {
-
-            // 若是value，可直接remove
-            delList.add(topicDelete);
-//            topicDelete.remove();
-
-        }
-
-        for(TopicIF t : delList){
-            t.remove();
-        }
+        ArrayList<TopicIF> childList = new ArrayList<TopicIF>();
         
+        while (!delStack.isEmpty()) {
+            // TODO 根据topicDelete查找相关联的topic，保存在Arraylist中
+            String SI = delStack.peek().getSubjectIdentifiers().toString();
+            // TODO 根据栈顶topic的SI，查找相关联的topic保存在childList中
+            String query = "";
+            
+            if (tt == TopicType.Scene) {
+
+                // TODO 若是scene，删除与该节点有sd关联的主题，删除与该节点有ss关联且扮演childscene角色的主题
+                // 需递归
+                query = "select $d from subject-identifier($d, \"http://topic3\"), scene-scene( $p:parentscene, $c:childscene), root-scene($s:scene, $d:data)?";
+
+            } else if (tt == TopicType.Data) {
+
+                // TODO 若是data，删除与该节点有dv关联的主题
+                query = "select $d from subject-identifier($d, \"http://topic3\"), data-value( $d:data, $v:value)?";
+
+            } else if (tt == TopicType.Value) {
+
+                // 若是value，可直接remove
+                childList.add(topicDelete);
+                // topicDelete.remove();
+
+            }
+            
+            if (childList.isEmpty()) {
+                TopicIF tempTopic = delStack.pop();
+                tempTopic.remove();
+            } else {
+                for(TopicIF t : childList){
+                    delStack.push(t);
+                }
+            }
+        }
+
+//        
+//        String query = "";
+//        // TODO 删除子树
+//        if (tt == TopicType.Scene) {
+//
+//            // TODO 若是scene，删除与该节点有sd关联的主题，删除与该节点有ss关联且扮演childscene角色的主题
+//            // 需递归
+//            query = "select $d from subject-identifier($d, \"http://topic3\"), scene-scene( $p:parentscene, $c:childscene), root-scene($s:scene, $d:data)?";
+//            
+//            
+//        } else if (tt == TopicType.Data) {
+//
+//            // TODO 若是data，删除与该节点有dv关联的主题
+//            query = "select $d from subject-identifier($d, \"http://topic3\"), data-value( $d:data, $v:value)?";
+//            
+//        } else if (tt == TopicType.Value) {
+//
+//            // 若是value，可直接remove
+//            childList.add(topicDelete);
+////            topicDelete.remove();
+//
+//        }
+//
+//        for(TopicIF t : childList){
+//            t.remove();
+//        }
+//        
         
         new XTMTopicMapWriter(XTM).write(dTopicmap);
 
