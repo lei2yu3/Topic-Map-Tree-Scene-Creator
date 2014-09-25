@@ -40,7 +40,15 @@ public class test {
 //        TopicMapBuilderIF b = tm.getBuilder();
 
         System.out.println("size of topic = " + tm.getTopics().size());
+
+        TopicIF hh = tm.getTopicBySubjectIdentifier(new URILocator("http://31"));
+        System.out.println(hh.getTopicNames());
+        System.out.println(hh);
+        System.out.println(hh.getAssociations());
+        System.out.println(hh.getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicdata"))));
+//        System.out.println(hh.getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicdate"))));
         
+        System.out.println("===== =================== =====");
         /*
         System.out.println("===== QUERY 2 =====");
 
@@ -71,9 +79,9 @@ public class test {
         System.out.println("===== DELETE TOPIC =====");
         // query 1
         {
-            TopicType tt = TopicType.Value;
+            TopicType tt = null;//TopicType.Value;
             // 需要删除的子树的根节点的id
-            int delIndex = 3;
+            int delIndex = 2;
 			
 			
         // XTMTopicMapReader dReader = new XTMTopicMapReader(new File(XTM));
@@ -81,11 +89,11 @@ public class test {
         // TopicMapBuilderIF dBuilder = dTopicMap.getBuilder();
 			
             // 将id转换为SI
-            String delSI = "http://topic" + String.valueOf(delIndex);
+            String delSI = "http://" + String.valueOf(delIndex);
             // 在tm中找到该节点
             TopicIF topicDelete = tm
                     .getTopicBySubjectIdentifier(new URILocator(delSI));
-            System.out.println("treeroot = " + topicDelete.getTopicNames());
+            System.out.println("treeroot = " + topicDelete);
             
 
             // 查询结果保存在list
@@ -109,29 +117,36 @@ public class test {
                 System.out.println(SI);
 
                 String sss = null;
-                
+
+                System.out.println(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicchildscene"))));
+                System.out.println(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicparentscene"))));
+                System.out.println(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicscene"))));
+                System.out.println(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicdata"))));
+                System.out.println(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicvalue"))));
+                System.out.println(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicroot"))));
+//                
                 // 判断栈顶元素的类型
-                if(topicDelete.getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicchildscene"))).size() != 0){
+                if(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicchildscene"))).size() != 0){
                     System.out.println("type = Cscene");
                     tt = TopicType.Scene;
                     
-                }else if(topicDelete.getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicparentscene"))).size() != 0){
+                }else if(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicparentscene"))).size() != 0){
                     System.out.println("type = Pscene");
                     tt = TopicType.Scene;
                     
-                }else if(topicDelete.getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicscene"))).size() != 0){
+                }else if(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicscene"))).size() != 0){
                     System.out.println("type = Scene");
                     tt = TopicType.Scene;
                     
-                }else if(topicDelete.getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicdata"))).size() != 0){
+                }else if(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicdata"))).size() != 0){
                     System.out.println("type = Data");
                     tt = TopicType.Data;
 
-                }else if(topicDelete.getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicvalue"))).size() != 0){
+                }else if(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicvalue"))).size() != 0){
                     System.out.println("type = Value");
                     tt = TopicType.Value;
 
-                }else if(topicDelete.getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicroot"))).size() != 0){
+                }else if(delStack.peek().getRolesByType(tm.getTopicBySubjectIdentifier(new URILocator("http://topicroot"))).size() != 0){
                     System.out.println("type = Root");
                     tt = TopicType.Root;
                 }else{
@@ -141,6 +156,7 @@ public class test {
                 // 根据元素类型进行查找
                 // tolog查询语句，和该节点具有某个关联的主题
                 if (tt == TopicType.Scene) {
+                    System.out.println("tt = Scene");
 
                     sss = "select $c, $d from subject-identifier($t, \""
                             + SI
@@ -168,16 +184,19 @@ public class test {
                     
                     delList = n;
                 } else if (tt == TopicType.Data) {
+                    System.out.println("tt = Data");
 
                     sss = "select $v from subject-identifier($t, \"" + SI
-                            + "\"), data-value($t : scene, $v : value)?";
+                            + "\"), data-value($t : data, $v : value)?";
 
                     // 查询dv关联
 //                    List<TopicIF> list
                     delList = wrapper.queryForList(sss);
                 } else if (tt == TopicType.Value) {
+                    System.out.println("tt = Value");
 
                     // 无关联
+                    delList = new ArrayList<TopicIF>() ;
                     
                 }
 
@@ -195,6 +214,7 @@ public class test {
                     }
                     System.out.println("ELSE " + delStack.size());
                 }
+                
             }
         }
 

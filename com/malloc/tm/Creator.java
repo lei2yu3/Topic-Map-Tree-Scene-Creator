@@ -18,7 +18,7 @@ import net.ontopia.topicmaps.xml.XTMTopicMapReader;
 import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
 
 public class Creator {
-    private static final String XTM = "hoho.xtm";
+    private static final String XTM = "xixi.xtm";
 
     
     static TopicMapIF cTopicmap = null;
@@ -57,17 +57,16 @@ public class Creator {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void main(String[] args) throws IOException {
 
-        XTMTopicMapReader r = new XTMTopicMapReader(new File("hoho.xtm"));
+        XTMTopicMapReader r = new XTMTopicMapReader(new File(XTM));
         TopicMapIF tm = r.read();
         TopicMapBuilderIF b = tm.getBuilder();
         System.out.println("size of topic = " + tm.getTopics().size());
 
-        new XTMTopicMapWriter("hoho.xtm").write(tm);
+        new XTMTopicMapWriter(XTM).write(tm);
         // Creator c = new Creator();
-        
+
         /*
          AddTopic(-1, 1, TopicType.Scene);
          AddTopic(-1, 2, TopicType.Scene);
@@ -75,22 +74,45 @@ public class Creator {
          AddTopic(-1, 4, TopicType.Scene);
 
          AddTopic(1, 11, TopicType.Scene);
-         AddTopic(1, 12, TopicType.Data);
-         AddTopic(11, 111, TopicType.Data);
-         AddTopic(111, 1111, TopicType.Value);
-         
-         AddTopic(2, 21, TopicType.Data);
-         AddTopic(2, 211, TopicType.Value);
-         AddTopic(2, 212, TopicType.Value);
+         AddTopic(1, 12, TopicType.Scene);
+         AddTopic(11, 111, TopicType.Scene);
+         AddTopic(111, 1111, TopicType.Scene);
+         AddTopic(1111, 11111, TopicType.Scene);
+         AddTopic(11111, 111111, TopicType.Scene);
+         AddTopic(111111, 1111111, TopicType.Data);
+         AddTopic(1111111, 11111111, TopicType.Value);
+         AddTopic(12, 121, TopicType.Data);
+         AddTopic(121, 1211, TopicType.Value);
 
-         AddTopic(3, 31, TopicType.Scene);
-         AddTopic(3, 32, TopicType.Data);
-         AddTopic(3, 33, TopicType.Data);
-         AddTopic(31, 311, TopicType.Data);
-         AddTopic(32, 321, TopicType.Value);
-        
+         AddTopic(2, 21, TopicType.Data);
+         AddTopic(2, 22, TopicType.Data);
+         AddTopic(2, 23, TopicType.Scene);
+         AddTopic(21, 211, TopicType.Value);
+         AddTopic(21, 212, TopicType.Value);
+         AddTopic(21, 213, TopicType.Value);
+         AddTopic(21, 214, TopicType.Value);
+         AddTopic(23, 231, TopicType.Scene);
+         AddTopic(231, 2311, TopicType.Data);
+         AddTopic(2311, 23111, TopicType.Value);
+         AddTopic(23, 232, TopicType.Scene);
+         AddTopic(232, 2321, TopicType.Data);
+         AddTopic(2321, 23211, TopicType.Value);
+         AddTopic(23, 233, TopicType.Data);
+         AddTopic(23, 234, TopicType.Data);
+         AddTopic(23, 235, TopicType.Data);
+         AddTopic(235, 2351, TopicType.Value);
+         AddTopic(235, 2352, TopicType.Value);
+         AddTopic(235, 2353, TopicType.Value);
+         AddTopic(235, 2354, TopicType.Value);
+
+         AddTopic(3, 31, TopicType.Data);
+         AddTopic(31, 311, TopicType.Value);
+         AddTopic(31, 312, TopicType.Value);
+         AddTopic(31, 313, TopicType.Value);
         */
-         DeleteTopic(3, TopicType.Data);
+
+//        DeleteTopic(121, TopicType.Scene);
+        DeleteTopic(3);
         
         /*
             // test for List<HashMap <String, TopicIF> > list = wrapper.queryForMaps(query);
@@ -218,9 +240,8 @@ public class Creator {
         return newSize - oldSize == 1 ? true : false;
     }
 
-    // TODO BUG 叶子节点是Value类型无法删除
     @SuppressWarnings("unchecked")
-    public static boolean DeleteTopic(int delIndex, TopicType tt)
+    public static boolean DeleteTopic(int delIndex)
             throws IOException {
 
         XTMTopicMapReader dReader = new XTMTopicMapReader(new File(XTM));
@@ -229,8 +250,7 @@ public class Creator {
 
         int oldSize = dTopicmap.getTopics().size();
         int delSize = 0;
-
-        // ==========================================================================
+        TopicType tt = null;
 
         // 将id转换为SI
         String delSI = "http://" + String.valueOf(delIndex);
@@ -256,25 +276,22 @@ public class Creator {
 
             String sss = null;
 
-            // 判断栈顶元素的类型
-            if (topicDelete.getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicparentscene"))).size() != 0
-                || topicDelete.getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicchildscene"))).size() != 0
-                || topicDelete.getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicscene"))).size() != 0) {
+            // 判断栈顶元素的类型 
+            if (delStack.peek().getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicparentscene"))).size() != 0
+                || delStack.peek().getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicchildscene"))).size() != 0
+                || delStack.peek().getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicscene"))).size() != 0) {
                 System.out.println("type = Scene");
                 tt = TopicType.Scene;
 
-            } else if (topicDelete.getRolesByType(
-                dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicdata"))).size() != 0) {
+            } else if (delStack.peek().getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicdata"))).size() != 0) {
                 System.out.println("type = Data");
                 tt = TopicType.Data;
 
-            } else if (topicDelete.getRolesByType(
-                dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicvalue"))).size() != 0) {
+            } else if (delStack.peek().getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicvalue"))).size() != 0) {
                 System.out.println("type = Value");
                 tt = TopicType.Value;
 
-            } else if (topicDelete.getRolesByType(
-                dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicroot"))).size() != 0) {
+            } else if (delStack.peek().getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicroot"))).size() != 0) {
                 System.out.println("type = Root");
                 tt = TopicType.Root;
             } else {
@@ -314,15 +331,15 @@ public class Creator {
             } else if (tt == TopicType.Data) {
 
                 sss = "select $v from subject-identifier($t, \"" + SI
-                        + "\"), data-value($t :a, $v : value)?";
+                        + "\"), data-value($t :data, $v : value)?";
 
                 // 查询dv关联
                 // List<TopicIF> list
                 delList = wrapper.queryForList(sss);
             } else if (tt == TopicType.Value) {
 
-                // 无关联
-
+                // 无关联，delList置空
+                delList = new ArrayList<TopicIF>();
             }
 
             System.out.println("childrenlist size = " + delList.size());
@@ -341,7 +358,6 @@ public class Creator {
                 System.out.println("ELSE " + delStack.size());
             }
         }
-        // ==========================================================================
 
         new XTMTopicMapWriter(XTM).write(dTopicmap);
 
@@ -404,6 +420,7 @@ public class Creator {
         } else if (tt == TopicType.Value) {
 
 //            showList.add(topicShow);
+            showList = new ArrayList<TopicIF>(); 
 
         }
 
