@@ -2,8 +2,9 @@ package com.malloc.tm;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
 
 import net.ontopia.infoset.impl.basic.URILocator;
@@ -12,13 +13,14 @@ import net.ontopia.topicmaps.core.TopicIF;
 import net.ontopia.topicmaps.core.TopicMapBuilderIF;
 import net.ontopia.topicmaps.core.TopicMapIF;
 import net.ontopia.topicmaps.impl.basic.InMemoryTopicMapStore;
+import net.ontopia.topicmaps.query.utils.QueryWrapper;
 import net.ontopia.topicmaps.xml.XTMTopicMapReader;
 import net.ontopia.topicmaps.xml.XTMTopicMapWriter;
 
 public class Creator {
     private static final String XTM = "hoho.xtm";
 
-    //
+    
     static TopicMapIF cTopicmap = null;
     static XTMTopicMapReader cReader = null;
     static TopicMapBuilderIF cBuilder = null;
@@ -55,16 +57,89 @@ public class Creator {
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void main(String[] args) throws IOException {
 
-        Creator c = new Creator();
+        XTMTopicMapReader r = new XTMTopicMapReader(new File("hoho.xtm"));
+        TopicMapIF tm = r.read();
+        TopicMapBuilderIF b = tm.getBuilder();
+        System.out.println("size of topic = " + tm.getTopics().size());
 
-        // AddTopic(-1, 665, TopicType.Scene);
-        // AddTopic(-1, 345, TopicType.Scene);
-        // AddTopic(345, 77, TopicType.Scene);
-        // AddTopic(345, 737, TopicType.Scene);
-        // AddTopic(665, 97, TopicType.Scene);
+        new XTMTopicMapWriter("hoho.xtm").write(tm);
+        // Creator c = new Creator();
+        
+        /*
+         AddTopic(-1, 1, TopicType.Scene);
+         AddTopic(-1, 2, TopicType.Scene);
+         AddTopic(-1, 3, TopicType.Scene);
+         AddTopic(-1, 4, TopicType.Scene);
 
+         AddTopic(1, 11, TopicType.Scene);
+         AddTopic(1, 12, TopicType.Data);
+         AddTopic(11, 111, TopicType.Data);
+         AddTopic(111, 1111, TopicType.Value);
+         
+         AddTopic(2, 21, TopicType.Data);
+         AddTopic(2, 211, TopicType.Value);
+         AddTopic(2, 212, TopicType.Value);
+
+         AddTopic(3, 31, TopicType.Scene);
+         AddTopic(3, 32, TopicType.Data);
+         AddTopic(3, 33, TopicType.Data);
+         AddTopic(31, 311, TopicType.Data);
+         AddTopic(32, 321, TopicType.Value);
+        
+        */
+         DeleteTopic(3, TopicType.Data);
+        
+        /*
+            // test for List<HashMap <String, TopicIF> > list = wrapper.queryForMaps(query);
+
+
+                XTMTopicMapReader r = new XTMTopicMapReader(new File("xixi.xtm"));
+                TopicMapIF tm = r.read();
+                TopicMapBuilderIF b = tm.getBuilder();
+                
+                String query = // "select $r, $c from " +
+                "subject-identifier($t, \"http://topic31\")," + 
+        //         "{ root-scene($r : root, $t : scene) | scene-scene($t : parentscene, $c : childscene)}?";
+        //         "root-scene($r : root, $t : scene), scene-scene($t : parentscene, $c : childscene)?";
+                // "root-scene($r : root, $t : scene)?";
+                 "scene-scene($t : parentscene, $c : childscene)?";
+
+                ArrayList<TopicIF> l = new ArrayList<TopicIF>(); 
+                
+                QueryWrapper wrapper = new QueryWrapper(tm);
+                List<HashMap <String, TopicIF> > list = wrapper.queryForMaps(query);
+                System.out.println("size of topic = " + tm.getTopics().size());
+                
+        //        System.out.println(list.get(0).get("r") instanceof TopicIF);
+                for (HashMap<String, TopicIF> t : list) {
+                    if (t.get("r") != null) {
+                        System.out.println(t.get("r"));
+                        System.out.println(t.get("r") instanceof TopicIF);
+                        l.add(t.get("r"));
+                    }
+                    if (t.get("c") != null) {
+                        System.out.println(t.get("c"));
+                        System.out.println(t.get("c") instanceof TopicIF);
+                        l.add(t.get("c"));
+                    }
+
+        //            System.out.println("==" + t);
+        //            System.out.println("==" + t.getTopicMap());
+        //            System.out.println("==" + t.getSubjectIdentifiers());
+        //            System.out.println("==" + t.getObjectId());
+                }
+
+                for (TopicIF x : l) {
+                    System.out.println(x.getTopicNames());
+        //            x.remove();
+                }
+
+                new XTMTopicMapWriter("xixi.xtm").write(tm);
+                System.out.println("size of topic = " + tm.getTopics().size());
+        */
         System.out.println("\n Creator Done");
 
     }
@@ -72,183 +147,269 @@ public class Creator {
     public static boolean AddTopic(int pIndex, int addIndex, TopicType tt)
             throws IOException {
 
-        // XTMTopicMapReader cReader = new XTMTopicMapReader(new File(XTM));
-        // TopicMapIF cTopicmap = cReader.read();
-        // TopicMapBuilderIF cBuilder = cTopicmap.getBuilder();
+         XTMTopicMapReader aReader = new XTMTopicMapReader(new File(XTM));
+         TopicMapIF aTopicmap = aReader.read();
+         TopicMapBuilderIF aBuilder = aTopicmap.getBuilder();
 
-        int oldSize = cTopicmap.getTopics().size();
+        int oldSize = aTopicmap.getTopics().size();
 
         String pSI = "http://" + String.valueOf(pIndex);
-        TopicIF topicParent = cTopicmap
+        TopicIF topicParent = aTopicmap
                 .getTopicBySubjectIdentifier(new URILocator(pSI));
 
-        TopicIF topicAdd = cBuilder.makeTopic();
-        cBuilder.makeTopicName(topicAdd, String.valueOf(addIndex));
+        TopicIF topicAdd = aBuilder.makeTopic();
+        aBuilder.makeTopicName(topicAdd, String.valueOf(addIndex));
         String addSI = "http://" + String.valueOf(addIndex);
         topicAdd.addSubjectIdentifier(new URILocator(addSI));
 
         System.out.println(topicParent);
         System.out.println(topicAdd);
         if (pIndex == -1) {
-            // TODO
-            // creator构造中添加的“基本”topic，与，addtopic中添加的topic和association，不在同一个TM中，
-            // 要么使用全局TM，都使用从TopicMap；或者，add中使用aTopicMap，这时需要添加如下语句
-            // TopicIF topicRS = aTopicMap.getTopicBySubjectIdentifier(new
-            // URILocator("http://topicrs"));
-            // TopicIF topicRoot = aTopicMap.getTopicBySubjectIdentifier(new
-            // URILocator("http://topicroot"));
-            // TopicIF topicScene = aTopicMap.getTopicBySubjectIdentifier(new
-            // URILocator("http://topicscene"));
 
-            AssociationIF aRS = cBuilder.makeAssociation(topicRS);
-            cBuilder.makeAssociationRole(aRS, topicRoot, topicParent);
-            cBuilder.makeAssociationRole(aRS, topicScene, topicAdd);
+            // 不要使用全局TM，add时候读取XTM，根据SI获取基本topic
+            TopicIF topicKami = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topickami"));
+            TopicIF topicRoot = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicroot"));
+            TopicIF topicScene = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicscene"));
+            TopicIF topicRS = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicrs"));
+
+            AssociationIF aRS = aBuilder.makeAssociation(topicRS);
+            aBuilder.makeAssociationRole(aRS, topicRoot, topicKami);
+            aBuilder.makeAssociationRole(aRS, topicScene, topicAdd);
 
         } else {
 
             if (tt == TopicType.Scene) {
 
-                AssociationIF aSS = cBuilder.makeAssociation(topicSS);
-                cBuilder.makeAssociationRole(aSS, topicParentScene, topicParent);
-                cBuilder.makeAssociationRole(aSS, topicChildScene, topicAdd);
+                TopicIF topicParentScene = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicparentscene"));
+                TopicIF topicChildScene = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicchildscene"));
+                TopicIF topicSS = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicss"));
+
+                AssociationIF aSS = aBuilder.makeAssociation(topicSS);
+                aBuilder.makeAssociationRole(aSS, topicParentScene, topicParent);
+                aBuilder.makeAssociationRole(aSS, topicChildScene, topicAdd);
 
             } else if (tt == TopicType.Data) {
 
-                AssociationIF aSD = cBuilder.makeAssociation(topicSD);
-                cBuilder.makeAssociationRole(aSD, topicScene, topicParent);
-                cBuilder.makeAssociationRole(aSD, topicData, topicAdd);
+                TopicIF topicScene = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicscene"));
+                TopicIF topicData = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicdata"));
+                TopicIF topicSD = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicsd"));
+
+                AssociationIF aSD = aBuilder.makeAssociation(topicSD);
+                aBuilder.makeAssociationRole(aSD, topicScene, topicParent);
+                aBuilder.makeAssociationRole(aSD, topicData, topicAdd);
 
             } else if (tt == TopicType.Value) {
 
-                AssociationIF aDV = cBuilder.makeAssociation(topicDV);
-                cBuilder.makeAssociationRole(aDV, topicData, topicParent);
-                cBuilder.makeAssociationRole(aDV, topicValue, topicAdd);
+                TopicIF topicData = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicdata"));
+                TopicIF topicValue = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicvalue"));
+                TopicIF topicDV = aTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicdv"));
+
+                AssociationIF aDV = aBuilder.makeAssociation(topicDV);
+                aBuilder.makeAssociationRole(aDV, topicData, topicParent);
+                aBuilder.makeAssociationRole(aDV, topicValue, topicAdd);
 
             }
         }
 
-        new XTMTopicMapWriter(XTM).write(cTopicmap);
+        new XTMTopicMapWriter(XTM).write(aTopicmap);
 
-        int newSize = cTopicmap.getTopics().size();
+        int newSize = aTopicmap.getTopics().size();
 
         return newSize - oldSize == 1 ? true : false;
     }
 
+    // TODO BUG 叶子节点是Value类型无法删除
+    @SuppressWarnings("unchecked")
     public static boolean DeleteTopic(int delIndex, TopicType tt)
             throws IOException {
 
         XTMTopicMapReader dReader = new XTMTopicMapReader(new File(XTM));
         TopicMapIF dTopicmap = dReader.read();
-        TopicMapBuilderIF dBuilder = dTopicmap.getBuilder();
+//        TopicMapBuilderIF dBuilder = dTopicmap.getBuilder();
 
         int oldSize = dTopicmap.getTopics().size();
+        int delSize = 0;
 
+        // ==========================================================================
+
+        // 将id转换为SI
         String delSI = "http://" + String.valueOf(delIndex);
+        // 在tm中找到该节点
+        TopicIF topicDelete = dTopicmap.getTopicBySubjectIdentifier(new URILocator(delSI));
+        System.out.println("treeroot = " + topicDelete.getTopicNames());
 
-        TopicIF topicDelete = dTopicmap
-                .getTopicBySubjectIdentifier(new URILocator(delSI));
+        // 查询结果保存在list
+        QueryWrapper wrapper = new QueryWrapper(dTopicmap);
+        List<TopicIF> delList = new ArrayList<TopicIF>();
 
+        // 子树根节点入栈
         Stack<TopicIF> delStack = new Stack<TopicIF>();
         delStack.push(topicDelete);
 
-        ArrayList<TopicIF> childList = new ArrayList<TopicIF>();
-        
         while (!delStack.isEmpty()) {
-            // TODO 根据topicDelete查找相关联的topic，保存在Arraylist中
+
+            System.out.println("==============================================");
             String SI = delStack.peek().getSubjectIdentifiers().toString();
-            // TODO 根据栈顶topic的SI，查找相关联的topic保存在childList中
-            String query = "";
-            
+            System.out.println(SI);
+            SI = SI.substring(5, SI.length() - 1);
+            System.out.println(SI);
+
+            String sss = null;
+
+            // 判断栈顶元素的类型
+            if (topicDelete.getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicparentscene"))).size() != 0
+                || topicDelete.getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicchildscene"))).size() != 0
+                || topicDelete.getRolesByType(dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicscene"))).size() != 0) {
+                System.out.println("type = Scene");
+                tt = TopicType.Scene;
+
+            } else if (topicDelete.getRolesByType(
+                dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicdata"))).size() != 0) {
+                System.out.println("type = Data");
+                tt = TopicType.Data;
+
+            } else if (topicDelete.getRolesByType(
+                dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicvalue"))).size() != 0) {
+                System.out.println("type = Value");
+                tt = TopicType.Value;
+
+            } else if (topicDelete.getRolesByType(
+                dTopicmap.getTopicBySubjectIdentifier(new URILocator("http://topicroot"))).size() != 0) {
+                System.out.println("type = Root");
+                tt = TopicType.Root;
+            } else {
+                System.out.println("type = else");
+            }
+
+            // 根据元素类型进行查找
+            // tolog查询语句，和该节点具有某个关联的主题
             if (tt == TopicType.Scene) {
 
-                // TODO 若是scene，删除与该节点有sd关联的主题，删除与该节点有ss关联且扮演childscene角色的主题
-                // 需递归
-                query = "select $d from subject-identifier($d, \"http://topic3\"), scene-scene( $p:parentscene, $c:childscene), root-scene($s:scene, $d:data)?";
+                sss = "select $c, $d from subject-identifier($t, \""
+                        + SI
+                        + "\"), { scene-scene($t : parentscene, $c : childscene) | scene-data($t : scene, $d : data)}?";
 
+                // 查询ss和sd关联
+                List<HashMap<String, TopicIF>> map = wrapper.queryForMaps(sss);
+                ArrayList<TopicIF> n = new ArrayList<TopicIF>();
+
+                for (HashMap<String, TopicIF> t : map) {
+                    System.out.println("t.d == " + t.get("d") + " t.c == "
+                            + t.get("c"));
+
+                    if (t.get("d") != null) {
+                        System.out.println(t.get("d"));
+                        System.out.println(t.get("d") instanceof TopicIF);
+                        n.add(t.get("d"));
+                    }
+
+                    if (t.get("c") != null) {
+                        System.out.println(t.get("c"));
+                        System.out.println(t.get("c") instanceof TopicIF);
+                        n.add(t.get("c"));
+                    }
+                }
+
+                delList = n;
             } else if (tt == TopicType.Data) {
 
-                // TODO 若是data，删除与该节点有dv关联的主题
-                query = "select $d from subject-identifier($d, \"http://topic3\"), data-value( $d:data, $v:value)?";
+                sss = "select $v from subject-identifier($t, \"" + SI
+                        + "\"), data-value($t :a, $v : value)?";
 
+                // 查询dv关联
+                // List<TopicIF> list
+                delList = wrapper.queryForList(sss);
             } else if (tt == TopicType.Value) {
 
-                // 若是value，可直接remove
-                childList.add(topicDelete);
-                // topicDelete.remove();
+                // 无关联
 
             }
-            
-            if (childList.isEmpty()) {
+
+            System.out.println("childrenlist size = " + delList.size());
+
+            if (delList.size() == 0) {
                 TopicIF tempTopic = delStack.pop();
                 tempTopic.remove();
+                ++delSize;
+                // // TopicIF tempTopic = delStack.peek();
+                System.out.println(tempTopic.getTopicNames());
+                System.out.println("IF " + delStack.size());
             } else {
-                for(TopicIF t : childList){
+                for (TopicIF t : delList) {
                     delStack.push(t);
                 }
+                System.out.println("ELSE " + delStack.size());
             }
         }
+        // ==========================================================================
 
-//        
-//        String query = "";
-//        // TODO 删除子树
-//        if (tt == TopicType.Scene) {
-//
-//            // TODO 若是scene，删除与该节点有sd关联的主题，删除与该节点有ss关联且扮演childscene角色的主题
-//            // 需递归
-//            query = "select $d from subject-identifier($d, \"http://topic3\"), scene-scene( $p:parentscene, $c:childscene), root-scene($s:scene, $d:data)?";
-//            
-//            
-//        } else if (tt == TopicType.Data) {
-//
-//            // TODO 若是data，删除与该节点有dv关联的主题
-//            query = "select $d from subject-identifier($d, \"http://topic3\"), data-value( $d:data, $v:value)?";
-//            
-//        } else if (tt == TopicType.Value) {
-//
-//            // 若是value，可直接remove
-//            childList.add(topicDelete);
-////            topicDelete.remove();
-//
-//        }
-//
-//        for(TopicIF t : childList){
-//            t.remove();
-//        }
-//        
-        
         new XTMTopicMapWriter(XTM).write(dTopicmap);
 
         int newSize = dTopicmap.getTopics().size();
-        return newSize - oldSize == 1 ? true : false;
+        return newSize - oldSize == delSize ? true : false;
     }
 
-    public static ArrayList<TopicIF> ShowTopic(int showIndex, TopicType tt)
-            throws MalformedURLException {
+    @SuppressWarnings("unchecked")
+    public static List<TopicIF> ShowTopic(int showIndex, TopicType tt)
+            throws IOException {
 
-        ArrayList<TopicIF> showList = new ArrayList<TopicIF>();
+        XTMTopicMapReader sReader = new XTMTopicMapReader(new File(XTM));
+        TopicMapIF sTopicmap = sReader.read();
+//        TopicMapBuilderIF sBuilder = sTopicmap.getBuilder();
 
-        String sSI = "http://" + String.valueOf(showIndex);
-        TopicIF topicShow = cTopicmap
-                .getTopicBySubjectIdentifier(new URILocator(sSI));
+        List<TopicIF> showList = new ArrayList<TopicIF>();
 
+        String SI = "http://topic" + String.valueOf(showIndex);
+//        TopicIF topicShow = cTopicmap.getTopicBySubjectIdentifier(new URILocator(SI));
+
+        QueryWrapper wrapper = new QueryWrapper(sTopicmap);
+        String sss = null;
+        
         if (tt == TopicType.Scene) {
 
-            // TODO 遍历！！查找topicShow所有子节点存入showList
+            sss = "select $c, $d from subject-identifier($t, \""
+                    + SI
+                    + "\"), { scene-scene($t : parentscene, $c : childscene) | scene-data($t : scene, $d : data)}?";
+
+            // 查询ss和sd关联
+            List<HashMap<String, TopicIF>> map = wrapper.queryForMaps(sss);
+            ArrayList<TopicIF> n = new ArrayList<TopicIF>();
+
+            for (HashMap<String, TopicIF> t : map) {
+              System.out.println("t.d == " + t.get("d") + " t.c == " + t.get("c"));
+                
+                if (t.get("d") != null) {
+                    System.out.println(t.get("d"));
+                    System.out.println(t.get("d") instanceof TopicIF);
+                    n.add(t.get("d"));
+                }
+                
+                if (t.get("c") != null) {
+                    System.out.println(t.get("c"));
+                    System.out.println(t.get("c") instanceof TopicIF);
+                    n.add(t.get("c"));
+                }
+            }
+            
+            showList = n;
 
         } else if (tt == TopicType.Data) {
 
-            // TODO 查找topicShow所有子节点存入showList
+            sss = "select $v from subject-identifier($t, \"" + SI
+                    + "\"), data-value($t : scene, $v : value)?";
+
+            // 查询dv关联
+            showList = wrapper.queryForList(sss);
 
         } else if (tt == TopicType.Value) {
 
-            showList.add(topicShow);
+//            showList.add(topicShow);
 
         }
 
         return showList;
     }
 
-    
     public Creator() throws IOException {
 
         new XTMTopicMapWriter(XTM).write(new InMemoryTopicMapStore()
@@ -261,7 +422,7 @@ public class Creator {
         //
         topicBigBro = cBuilder.makeTopic();
         cBuilder.makeTopicName(topicBigBro, "BigBro");
-        topicBigBro.addSubjectIdentifier(new URILocator("http://-1"));
+        topicBigBro.addSubjectIdentifier(new URILocator("http://topicKami"));
 
         //
         topicScene = cBuilder.makeTopic();
@@ -362,6 +523,7 @@ public class Creator {
         TopicIF topic411 = cBuilder.makeTopic();
         cBuilder.makeTopicName(topic411, "%411");
         topic411.addSubjectIdentifier(new URILocator("http://topic411"));
+
         /*
         //
         AssociationIF aRS1 = cBuilder.makeAssociation(topicRS);
@@ -426,67 +588,3 @@ public class Creator {
 
     }
 }
-
-/*
-
-
-tolog根据si查询topic
-subject-identifier($topic,"http://topic321/")?
-
-
-
-
-具体某个关联相关的一对topic
-root-scene, root, scene 是xtm文件中关联和关联角色对应的topic id
-root-scene( $R:root,$S:scene )?
-
-
-
-
-查找和指定topic具有某个关联相关的topic
-subject-identifier($S, "http://topic3"),
-root-scene( $R:root,$S:scene )?
-
-
-
-
-查找所有与指定topic有关联的topic
-select $Topic, $RoleType1, $AssociationType, $Topic2, $RoleType2 from
-
-subject-identifier($Topic, "http://topic2"),
-
-role-player($role1, $Topic), 
-association-role($Association, $role1), 
-association-role($Association, $role2), 
-role-player($role2, $Topic2), 
-$Topic /= $Topic2, 
-type($role1, $RoleType1), 
-type($role2, $RoleType2), 
-type($Association, $AssociationType)
-?
-
-
-
-
-排除与指定topic具有某个关联的topic剩下的所有topic
-
-select $Topic, $RoleType1, $AssociationType, $Topic2, $RoleType2 from
-
-subject-identifier($Topic, "http://topic3"),
-
-role-player($role1, $Topic), 
-association-role($Association, $role1), 
-association-role($Association, $role2), 
-role-player($role2, $Topic2), 
-$Topic /= $Topic2, 
-type($role1, $RoleType1), 
-type($role2, $RoleType2), 
-type($Association, $AssociationType),
-
-not(
-subject-identifier($RoleType1, "http://topicscene")
-)?
-
-
- 
-*/
