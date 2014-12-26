@@ -68,6 +68,7 @@ public class Creator {
         // Creator c = new Creator();
 
         /*
+        
          AddTopic(-1, 1, TopicType.Scene);
          AddTopic(-1, 2, TopicType.Scene);
          AddTopic(-1, 3, TopicType.Scene);
@@ -109,10 +110,12 @@ public class Creator {
          AddTopic(31, 311, TopicType.Value);
          AddTopic(31, 312, TopicType.Value);
          AddTopic(31, 313, TopicType.Value);
-        */
 
+         */
+         
 //        DeleteTopic(121, TopicType.Scene);
-        DeleteTopic(3);
+//        DeleteTopic(2);
+//        AddTopic(-1, 2, TopicType.Data);
         
         /*
             // test for List<HashMap <String, TopicIF> > list = wrapper.queryForMaps(query);
@@ -169,9 +172,9 @@ public class Creator {
     public static boolean AddTopic(int pIndex, int addIndex, TopicType tt)
             throws IOException {
 
-         XTMTopicMapReader aReader = new XTMTopicMapReader(new File(XTM));
-         TopicMapIF aTopicmap = aReader.read();
-         TopicMapBuilderIF aBuilder = aTopicmap.getBuilder();
+        XTMTopicMapReader aReader = new XTMTopicMapReader(new File(XTM));
+        TopicMapIF aTopicmap = aReader.read();
+        TopicMapBuilderIF aBuilder = aTopicmap.getBuilder();
 
         int oldSize = aTopicmap.getTopics().size();
 
@@ -331,7 +334,7 @@ public class Creator {
             } else if (tt == TopicType.Data) {
 
                 sss = "select $v from subject-identifier($t, \"" + SI
-                        + "\"), data-value($t :data, $v : value)?";
+                        + "\"), data-value($t : data, $v : value)?";
 
                 // ²éÑ¯dv¹ØÁª
                 // List<TopicIF> list
@@ -364,7 +367,7 @@ public class Creator {
         int newSize = dTopicmap.getTopics().size();
         return newSize - oldSize == delSize ? true : false;
     }
-
+/*
     @SuppressWarnings("unchecked")
     public static List<TopicIF> ShowTopic(int showIndex, TopicType tt)
             throws IOException {
@@ -426,7 +429,7 @@ public class Creator {
 
         return showList;
     }
-
+*/
     public Creator() throws IOException {
 
         new XTMTopicMapWriter(XTM).write(new InMemoryTopicMapStore()
